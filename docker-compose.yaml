@@ -1,0 +1,105 @@
+services:
+
+  postgres_service:
+    image: postgres
+    restart: always
+    container_name: postgres_service
+    ports:
+      - 5433:5432
+    environment:
+      - POSTGRES_USER
+      - POSTGRES_PASSWORD
+      - POSTGRES_DB
+      - HOST=postgres_service
+    volumes:
+      - ./data/postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq_service:
+    image: rabbitmq
+    restart: always
+    container_name: rabbitmq_service
+    volumes:
+      - "./data/rabbitmq_data:/var/lib/rabbitmq"
+    environment:
+      - HOST=rabbitmq_service
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis_service:
+    image: redis
+    restart: always
+    container_name: redis_service
+    environment:
+      - HOST=redis_service
+    ports:
+      - 6378:6379
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api_service:
+    build: ./api-service
+    container_name: api_service
+    restart: always
+    environment:
+      - DB_URI
+      - RD_URI
+      - RBMQ_URI
+      - JWT_SECRET
+      - HOST=api_service
+    depends_on:
+      postgres_service:
+        condition: service_healthy
+        restart: true
+      rabbitmq_service:
+        condition: service_healthy
+        restart: true
+      redis_service:
+        condition: service_healthy
+        restart: true
+
+  socket_service:
+    build: ./socket-service
+    container_name: socket_service
+    restart: always
+    environment:
+      - DB_URI
+      - RD_URI
+      - RBMQ_URI
+      - JWT_SECRET
+      - HOST=socket_service
+    depends_on:
+      postgres_service:
+        condition: service_healthy
+        restart: true
+      rabbitmq_service:
+        condition: service_healthy
+        restart: true
+      redis_service:
+        condition: service_healthy
+        restart: true
+
+  nginx:
+    restart: always
+    image: nginx
+    container_name: nginx
+    ports:
+      - 3000:80
+    environment:
+      - HOST=nginx_service
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./index.html:/usr/share/nginx/html/index.html:ro
+    depends_on:
+      - api_service
+      - socket_service

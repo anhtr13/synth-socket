@@ -1,0 +1,6 @@
+# Query name constraint
+
+[Get | Find | Create | Update | Delete] [table_name] (By attributes)
+
+- Get:  return many
+- Find: return one

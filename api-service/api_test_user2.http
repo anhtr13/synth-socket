@@ -1,0 +1,80 @@
+###
+POST http://localhost:3000/api/v1/auth/signup
+Content-Type: application/json
+Accept: application/json
+
+{
+  "user_name": "anhbro",
+  "user_email": "anhbro@gmail.com",
+  "password": "abc123"
+}
+
+###
+POST http://localhost:3000/api/v1/auth/signin
+Content-Type: application/json
+Accept: application/json
+
+{
+  "user_email": "anhbro@gmail.com",
+  "password": "abc123"
+}
+
+###
+GET http://localhost:3000/api/v1/@/info
+Content-Type: application/json
+Accept: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImUwMDgxZjVlLTZkZDMtNDY2MC05MGI2LTFmZDZhYWQyNTY4NiIsImVtYWlsIjoiYW5oYnJvQGdtYWlsLmNvbSIsIm5hbWUiOiJhbmhicm8iLCJzdWIiOiJhY2Nlc3NfdG9rZW4iLCJleHAiOjE3NTkxMzk2MDcsImlhdCI6MTc1OTEzNzgwNywianRpIjoiZTAwODFmNWUtNmRkMy00NjYwLTkwYjYtMWZkNmFhZDI1Njg2In0.YSDs-RkGCgr2YH014594WH2jNGMKe6o54vnr9Pj6Ts0
+
+###
+GET http://localhost:3000/api/v1/@/notification
+Content-Type: application/json
+Accept: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImUwMDgxZjVlLTZkZDMtNDY2MC05MGI2LTFmZDZhYWQyNTY4NiIsImVtYWlsIjoiYW5oYnJvQGdtYWlsLmNvbSIsIm5hbWUiOiJhbmhicm8iLCJzdWIiOiJhY2Nlc3NfdG9rZW4iLCJleHAiOjE3NTkxMzk2MDcsImlhdCI6MTc1OTEzNzgwNywianRpIjoiZTAwODFmNWUtNmRkMy00NjYwLTkwYjYtMWZkNmFhZDI1Njg2In0.YSDs-RkGCgr2YH014594WH2jNGMKe6o54vnr9Pj6Ts0
+
+###
+POST http://localhost:3000/api/v1/auth/signout
+Content-Type: application/json
+Accept: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImUwMDgxZjVlLTZkZDMtNDY2MC05MGI2LTFmZDZhYWQyNTY4NiIsImVtYWlsIjoiYW5oYnJvQGdtYWlsLmNvbSIsIm5hbWUiOiJhbmhicm8iLCJzdWIiOiJhY2Nlc3NfdG9rZW4iLCJleHAiOjE3NTkxMzk2MDcsImlhdCI6MTc1OTEzNzgwNywianRpIjoiZTAwODFmNWUtNmRkMy00NjYwLTkwYjYtMWZkNmFhZDI1Njg2In0.YSDs-RkGCgr2YH014594WH2jNGMKe6o54vnr9Pj6Ts0
+
+###
+GET http://localhost:3000/api/v1/user
+Content-Type: application/json
+Accept: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImUwMDgxZjVlLTZkZDMtNDY2MC05MGI2LTFmZDZhYWQyNTY4NiIsImVtYWlsIjoiYW5oYnJvQGdtYWlsLmNvbSIsIm5hbWUiOiJhbmhicm8iLCJzdWIiOiJhY2Nlc3NfdG9rZW4iLCJleHAiOjE3NTkxMzk2MDcsImlhdCI6MTc1OTEzNzgwNywianRpIjoiZTAwODFmNWUtNmRkMy00NjYwLTkwYjYtMWZkNmFhZDI1Njg2In0.YSDs-RkGCgr2YH014594WH2jNGMKe6o54vnr9Pj6Ts0
+
+###
+GET http://localhost:3000/api/v1/group/366c0140-080c-4cb5-94e7-ca03b6aeb7bc/member
+Content-Type: application/json
+Accept: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImUwMDgxZjVlLTZkZDMtNDY2MC05MGI2LTFmZDZhYWQyNTY4NiIsImVtYWlsIjoiYW5oYnJvQGdtYWlsLmNvbSIsIm5hbWUiOiJhbmhicm8iLCJzdWIiOiJhY2Nlc3NfdG9rZW4iLCJleHAiOjE3NTkxMzk2MDcsImlhdCI6MTc1OTEzNzgwNywianRpIjoiZTAwODFmNWUtNmRkMy00NjYwLTkwYjYtMWZkNmFhZDI1Njg2In0.YSDs-RkGCgr2YH014594WH2jNGMKe6o54vnr9Pj6Ts0
+
+###
+GET http://localhost:3000/api/v1/group/366c0140-080c-4cb5-94e7-ca03b6aeb7bc/invite
+Content-Type: application/json
+Accept: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImUwMDgxZjVlLTZkZDMtNDY2MC05MGI2LTFmZDZhYWQyNTY4NiIsImVtYWlsIjoiYW5oYnJvQGdtYWlsLmNvbSIsIm5hbWUiOiJhbmhicm8iLCJzdWIiOiJhY2Nlc3NfdG9rZW4iLCJleHAiOjE3NTkxMzk2MDcsImlhdCI6MTc1OTEzNzgwNywianRpIjoiZTAwODFmNWUtNmRkMy00NjYwLTkwYjYtMWZkNmFhZDI1Njg2In0.YSDs-RkGCgr2YH014594WH2jNGMKe6o54vnr9Pj6Ts0
+
+###
+POST http://localhost:3000/api/v1/group/366c0140-080c-4cb5-94e7-ca03b6aeb7bc/invite/7eb424ad-4947-4109-9aed-2c41ca406165
+Content-Type: application/json
+Accept: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImUwMDgxZjVlLTZkZDMtNDY2MC05MGI2LTFmZDZhYWQyNTY4NiIsImVtYWlsIjoiYW5oYnJvQGdtYWlsLmNvbSIsIm5hbWUiOiJhbmhicm8iLCJzdWIiOiJhY2Nlc3NfdG9rZW4iLCJleHAiOjE3NTkxMzk2MDcsImlhdCI6MTc1OTEzNzgwNywianRpIjoiZTAwODFmNWUtNmRkMy00NjYwLTkwYjYtMWZkNmFhZDI1Njg2In0.YSDs-RkGCgr2YH014594WH2jNGMKe6o54vnr9Pj6Ts0
+
+###
+GET http://localhost:3000/api/v1/@/group
+Content-Type: application/json
+Accept: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImUwMDgxZjVlLTZkZDMtNDY2MC05MGI2LTFmZDZhYWQyNTY4NiIsImVtYWlsIjoiYW5oYnJvQGdtYWlsLmNvbSIsIm5hbWUiOiJhbmhicm8iLCJzdWIiOiJhY2Nlc3NfdG9rZW4iLCJleHAiOjE3NTkxMzk2MDcsImlhdCI6MTc1OTEzNzgwNywianRpIjoiZTAwODFmNWUtNmRkMy00NjYwLTkwYjYtMWZkNmFhZDI1Njg2In0.YSDs-RkGCgr2YH014594WH2jNGMKe6o54vnr9Pj6Ts0
+
+###
+GET http://localhost:3000/api/v1/@/group_invite
+Content-Type: application/json
+Accept: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImUwMDgxZjVlLTZkZDMtNDY2MC05MGI2LTFmZDZhYWQyNTY4NiIsImVtYWlsIjoiYW5oYnJvQGdtYWlsLmNvbSIsIm5hbWUiOiJhbmhicm8iLCJzdWIiOiJhY2Nlc3NfdG9rZW4iLCJleHAiOjE3NTkxMzk2MDcsImlhdCI6MTc1OTEzNzgwNywianRpIjoiZTAwODFmNWUtNmRkMy00NjYwLTkwYjYtMWZkNmFhZDI1Njg2In0.YSDs-RkGCgr2YH014594WH2jNGMKe6o54vnr9Pj6Ts0
+
+###
+POST http://localhost:3000/api/v1/@/group_invite/e7aa5ab0-904e-4ed1-88df-1a6a03a1054d
+Content-Type: application/json
+Accept: application/json
+Authorization: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImUwMDgxZjVlLTZkZDMtNDY2MC05MGI2LTFmZDZhYWQyNTY4NiIsImVtYWlsIjoiYW5oYnJvQGdtYWlsLmNvbSIsIm5hbWUiOiJhbmhicm8iLCJzdWIiOiJhY2Nlc3NfdG9rZW4iLCJleHAiOjE3NTkxMzk2MDcsImlhdCI6MTc1OTEzNzgwNywianRpIjoiZTAwODFmNWUtNmRkMy00NjYwLTkwYjYtMWZkNmFhZDI1Njg2In0.YSDs-RkGCgr2YH014594WH2jNGMKe6o54vnr9Pj6Ts0
