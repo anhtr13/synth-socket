@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+* {
+  @apply shrink-0
+}
+
+body {
+  @apply bg-neutral-900 text-white w-screen h-screen
+}
+
+input {
+  @apply outline-none border border-neutral-700 hover:border-neutral-400 focus:border-white
+}
+
+button, a {
+  @apply cursor-pointer
+}
+
+#app {
+  @apply relative w-screen h-screen flex flex-col sm:flex-row
+}
+
+.thin-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.thin-scrollbar::-webkit-scrollbar-track {
+  background-color: transparent;
+}
+
+.thin-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #a1a1a1;
+}

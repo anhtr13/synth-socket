@@ -17,7 +17,7 @@ type NotificationType string
 
 const (
 	REQ_FRIEND NotificationType = "friend_request"
-	REQ_GROUP  NotificationType = "group_request"
+	REQ_ROOM   NotificationType = "room_request"
 )
 
 type QueueMsg_Notification struct {

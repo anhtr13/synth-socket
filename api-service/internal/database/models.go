@@ -11,54 +11,11 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type MessageStatus string
-
-const (
-	MessageStatusSent      MessageStatus = "sent"
-	MessageStatusDelivered MessageStatus = "delivered"
-	MessageStatusRead      MessageStatus = "read"
-)
-
-func (e *MessageStatus) Scan(src interface{}) error {
-	switch s := src.(type) {
-	case []byte:
-		*e = MessageStatus(s)
-	case string:
-		*e = MessageStatus(s)
-	default:
-		return fmt.Errorf("unsupported scan type for MessageStatus: %T", src)
-	}
-	return nil
-}
-
-type NullMessageStatus struct {
-	MessageStatus MessageStatus `json:"message_status"`
-	Valid         bool          `json:"valid"` // Valid is true if MessageStatus is not NULL
-}
-
-// Scan implements the Scanner interface.
-func (ns *NullMessageStatus) Scan(value interface{}) error {
-	if value == nil {
-		ns.MessageStatus, ns.Valid = "", false
-		return nil
-	}
-	ns.Valid = true
-	return ns.MessageStatus.Scan(value)
-}
-
-// Value implements the driver Valuer interface.
-func (ns NullMessageStatus) Value() (driver.Value, error) {
-	if !ns.Valid {
-		return nil, nil
-	}
-	return string(ns.MessageStatus), nil
-}
-
 type NotificationType string
 
 const (
 	NotificationTypeFriendRequest NotificationType = "friend_request"
-	NotificationTypeGroupRequest  NotificationType = "group_request"
+	NotificationTypeRoomInvite    NotificationType = "room_invite"
 )
 
 func (e *NotificationType) Scan(src interface{}) error {
@@ -111,37 +68,13 @@ type Friendship struct {
 	CreatedAt    pgtype.Timestamp `json:"created_at"`
 }
 
-type Group struct {
-	GroupID      pgtype.UUID      `json:"group_id"`
-	GroupName    string           `json:"group_name"`
-	GroupPicture pgtype.Text      `json:"group_picture"`
-	CreatedBy    pgtype.UUID      `json:"created_by"`
-	CreatedAt    pgtype.Timestamp `json:"created_at"`
-}
-
-type GroupInvite struct {
-	InviteID   pgtype.UUID      `json:"invite_id"`
-	GroupID    pgtype.UUID      `json:"group_id"`
-	SenderID   pgtype.UUID      `json:"sender_id"`
-	ReceiverID pgtype.UUID      `json:"receiver_id"`
-	Accepted   pgtype.Bool      `json:"accepted"`
-	CreatedAt  pgtype.Timestamp `json:"created_at"`
-}
-
-type GroupMember struct {
-	GroupID  pgtype.UUID      `json:"group_id"`
-	MemberID pgtype.UUID      `json:"member_id"`
-	JoinedAt pgtype.Timestamp `json:"joined_at"`
-}
-
 type Message struct {
-	MessageID pgtype.UUID       `json:"message_id"`
-	GroupID   pgtype.UUID       `json:"group_id"`
-	SenderID  pgtype.UUID       `json:"sender_id"`
-	Text      string            `json:"text"`
-	MediaUrl  string            `json:"media_url"`
-	Status    NullMessageStatus `json:"status"`
-	CreatedAt pgtype.Timestamp  `json:"created_at"`
+	MessageID pgtype.UUID      `json:"message_id"`
+	RoomID    pgtype.UUID      `json:"room_id"`
+	SenderID  pgtype.UUID      `json:"sender_id"`
+	Text      string           `json:"text"`
+	MediaUrl  pgtype.Text      `json:"media_url"`
+	CreatedAt pgtype.Timestamp `json:"created_at"`
 }
 
 type Notification struct {
@@ -161,6 +94,29 @@ type RefreshToken struct {
 	UserName  string           `json:"user_name"`
 	ExpiredAt pgtype.Timestamp `json:"expired_at"`
 	CreatedAt pgtype.Timestamp `json:"created_at"`
+}
+
+type Room struct {
+	RoomID      pgtype.UUID      `json:"room_id"`
+	RoomName    string           `json:"room_name"`
+	RoomPicture pgtype.Text      `json:"room_picture"`
+	CreatedBy   pgtype.UUID      `json:"created_by"`
+	CreatedAt   pgtype.Timestamp `json:"created_at"`
+}
+
+type RoomInvite struct {
+	InviteID   pgtype.UUID      `json:"invite_id"`
+	RoomID     pgtype.UUID      `json:"room_id"`
+	SenderID   pgtype.UUID      `json:"sender_id"`
+	ReceiverID pgtype.UUID      `json:"receiver_id"`
+	Accepted   pgtype.Bool      `json:"accepted"`
+	CreatedAt  pgtype.Timestamp `json:"created_at"`
+}
+
+type RoomMember struct {
+	RoomID   pgtype.UUID      `json:"room_id"`
+	MemberID pgtype.UUID      `json:"member_id"`
+	JoinedAt pgtype.Timestamp `json:"joined_at"`
 }
 
 type User struct {

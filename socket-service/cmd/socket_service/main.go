@@ -18,8 +18,6 @@ func init() {
 }
 
 func gracefulShutdown(server *http.Server, done chan bool) {
-	defer conf.CloseAllConnections()
-
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
@@ -64,5 +62,6 @@ func main() {
 
 	<-forever
 
+	conf.CloseAllConnections()
 	log.Println("Graceful shutdown complete.")
 }

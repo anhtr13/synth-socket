@@ -61,35 +61,15 @@ func (s *SocketServer) initClient(client_conn *websocket.Conn, user_id uuid.UUID
 		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 
-		user_friendships, err := conf.RD_Client.SMembers(
+		user_rooms, err := conf.RD_Client.SMembers(
 			ctx,
-			fmt.Sprintf("%s:%s:%s", conf.RDKEY_PREFIX_USER, user_id.String(), conf.RDKEY_SUFFIX_FRIENDSHIPS),
-		).Result()
-		if err != nil {
-			return nil, nil, err
-		}
-		user_groups, err := conf.RD_Client.SMembers(
-			ctx,
-			fmt.Sprintf("%s:%s:%s", conf.RDKEY_PREFIX_USER, user_id.String(), conf.RDKEY_SUFFIX_GROUPS),
+			fmt.Sprintf("%s:%s:%s", conf.KEY_USER, user_id.String(), conf.USER_ROOMS),
 		).Result()
 		if err != nil {
 			return nil, nil, err
 		}
 
-		for _, id := range user_friendships {
-			room_id, err := uuid.Parse(id)
-			if err != nil {
-				continue
-			}
-			room := s.RoomPool.GetRoom(room_id)
-			if room == nil {
-				room = NewRoom(room_id)
-				s.RoomPool.AddRoom(room)
-			}
-			room.AddMember(user)
-		}
-
-		for _, id := range user_groups {
+		for _, id := range user_rooms {
 			room_id, err := uuid.Parse(id)
 			if err != nil {
 				continue
@@ -104,12 +84,6 @@ func (s *SocketServer) initClient(client_conn *websocket.Conn, user_id uuid.UUID
 	}
 
 	user.AddClient(client)
-	if user.CountClients() == 1 {
-		err := s.updateUserActiveStatus(user, "0")
-		if err != nil {
-			return nil, nil, err
-		}
-	}
 
 	return client, user, nil
 }
@@ -120,36 +94,15 @@ func (s *SocketServer) cleanUpClient(client *Client, user *User) {
 		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 
-		user_friendships, err := conf.RD_Client.SMembers(
+		user_rooms, err := conf.RD_Client.SMembers(
 			ctx,
-			fmt.Sprintf("%s:%s:%s", conf.RDKEY_PREFIX_USER, user.UserId.String(), conf.RDKEY_SUFFIX_FRIENDSHIPS),
-		).Result()
-		if err != nil {
-			return
-		}
-		user_groups, err := conf.RD_Client.SMembers(
-			ctx,
-			fmt.Sprintf("%s:%s:%s", conf.RDKEY_PREFIX_USER, user.UserId.String(), conf.RDKEY_SUFFIX_GROUPS),
+			fmt.Sprintf("%s:%s:%s", conf.KEY_USER, user.UserId.String(), conf.USER_ROOMS),
 		).Result()
 		if err != nil {
 			return
 		}
 
-		for _, id := range user_friendships {
-			room_id, err := uuid.Parse(id)
-			if err != nil {
-				continue
-			}
-			room := s.RoomPool.GetRoom(room_id)
-			if room == nil {
-				continue
-			}
-			room.RemoveMember(user)
-			if room.CountMembers() == 0 {
-				s.RoomPool.RemoveRoom(room)
-			}
-		}
-		for _, id := range user_groups {
+		for _, id := range user_rooms {
 			room_id, err := uuid.Parse(id)
 			if err != nil {
 				continue
@@ -165,7 +118,7 @@ func (s *SocketServer) cleanUpClient(client *Client, user *User) {
 		}
 		conf.RD_Client.Set(
 			ctx,
-			fmt.Sprintf("%s:%s:%s", conf.RDKEY_PREFIX_USER, user.UserId.String(), conf.RDKEY_SUFFIX_STATUS),
+			fmt.Sprintf("%s:%s:%s", conf.KEY_USER, user.UserId.String(), conf.USER_STATUS),
 			time.Now().String(),
 			0,
 		).Err()
@@ -179,7 +132,7 @@ func (s *SocketServer) updateUserActiveStatus(user *User, active_status string) 
 
 	err := conf.RD_Client.Set(
 		ctx,
-		fmt.Sprintf("%s:%s:%s", conf.RDKEY_PREFIX_USER, user.UserId.String(), conf.RDKEY_SUFFIX_STATUS),
+		fmt.Sprintf("%s:%s:%s", conf.KEY_USER, user.UserId.String(), conf.USER_STATUS),
 		active_status,
 		0,
 	).Err()

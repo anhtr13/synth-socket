@@ -1,0 +1,12 @@
+{
+  "bracketSameLine": true,
+  "singleAttributePerLine": true,
+  "useTabs": true,
+  "printWidth": 96,
+  "semi": true,
+  "plugins": [
+    "prettier-plugin-tailwindcss"
+  ],
+  "tailwindPreserveWhitespace": true,
+  "tailwindPreserveDuplicates": true
+}

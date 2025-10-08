@@ -5,7 +5,8 @@ CREATE TABLE refresh_tokens (
 	user_email varchar(255) NOT NULL,
 	user_name varchar(255) NOT NULL,
 	expired_at timestamp NOT NULL,
-	created_at timestamp NOT NULL
+	created_at timestamp without time zone DEFAULT now(),
+	UNIQUE (token, user_id)
 );
 
 CREATE INDEX idx_refresh_tokens_user_id ON refresh_tokens (user_id);

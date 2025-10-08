@@ -11,7 +11,6 @@ type UserSignUpPayload struct {
 	UserEmail    string `json:"user_email"`
 	UserName     string `json:"user_name"`
 	Password     string `json:"password"`
-	ProfileImage string `json:"profile_picture"`
 }
 
 func (payload *UserSignUpPayload) Validate() error {
@@ -81,7 +80,7 @@ func (user *UserUpdateInfoPayload) Validate() error {
 }
 
 // ==============================
-type CreateGroupPayload struct {
-	GroupName    string `json:"group_name"`
-	GroupPicture string `json:"group_picture"`
+type CreateRoomPayload struct {
+	RoomName    string `json:"room_name"`
+	RoomPicture string `json:"room_picture"`
 }

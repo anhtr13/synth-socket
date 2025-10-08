@@ -6,7 +6,6 @@ import (
 	"github.com/google/uuid"
 )
 
-// A room can be a group-chat or a chat between 2 friends
 type Room struct {
 	RoomId  uuid.UUID
 	Members map[uuid.UUID]*User
