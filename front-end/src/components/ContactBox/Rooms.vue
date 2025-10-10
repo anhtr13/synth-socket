@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from "vue";
 import { _get, _post } from "@/utils/fetch";
+import { toast } from "vue3-toastify";
 import type { Room } from "@/types/room";
 import type { UserInfo } from "@/types/user";
 import IconUsersPlus from "@/components/icons/IconUsersPlus.vue";
@@ -26,6 +27,7 @@ let timerId: any;
 onMounted(() => {
 	_get("/api/v1/room/all")
 		.then((data) => {
+			console.log(data);
 			rooms.value = data;
 		})
 		.catch((err) => {
@@ -105,6 +107,7 @@ watch(searchFriend, (value) => {
 
 function createRoom() {
 	if (!newRoomName.value) {
+		toast.warn("Enter room name");
 		return;
 	}
 	_post("/api/v1/room", {
@@ -114,24 +117,36 @@ function createRoom() {
 	})
 		.then((data) => {
 			console.log(data);
+			rooms.value = [data, ...rooms.value];
+			ownedRoom.value = [data, ...ownedRoom.value];
+			toast.success("Success!");
+			mode.value = "default";
 		})
-		.catch((err) => console.error(err));
+		.catch((err) => {
+			console.error(err);
+			toast.error(err.error);
+		});
 }
 
 function createRoomInvite(target_id: string) {
 	if (!inviteChosenRoom.value) {
+		toast.warn("Chose room");
 		return;
 	}
 	_post(`/api/v1/room/owned/${inviteChosenRoom.value.room_id}/invite/${target_id}`)
 		.then((data) => {
 			console.log(data);
+			toast.success("Success!");
 		})
-		.catch((err) => console.error(err));
+		.catch((err) => {
+			console.error(err);
+			toast.error(err.error);
+		});
 }
 </script>
 <template>
 	<template v-if="mode === 'default'">
-		<h3 class="text-lg font-semibold">Chat rooms</h3>
+		<h3 class="text-lg font-semibold">Rooms</h3>
 		<div class="flex flex-col">
 			<div class="mt-2 flex w-full items-center gap-x-1">
 				<button
@@ -209,7 +224,7 @@ function createRoomInvite(target_id: string) {
 			<span class="ml-2 text-sm"> Cancel </span>
 		</button>
 		<div class="mt-4 flex flex-col">
-			<h3 class="font-semibold">Created rooms:</h3>
+			<h3 class="mb-1 font-semibold">Created rooms:</h3>
 			<span
 				v-if="ownedRoom.length === 0"
 				class="ml-1 text-sm text-neutral-400">

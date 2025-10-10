@@ -12,14 +12,8 @@ const router = createRouter({
 			component: HomeView,
 			meta: { requireAuth: true },
 			children: [
-				{ path: "chat", component: () => import("@/views/ChatView.vue") },
+				{ path: "room", component: () => import("@/views/RoomView.vue") },
 				{ path: "user", name: "user", component: () => import("@/views/UserView.vue") },
-				{ path: "group", name: "group", component: () => import("@/views/GroupView.vue") },
-				{
-					path: "notification",
-					name: "notification",
-					component: () => import("@/views/NotificationView.vue"),
-				},
 			],
 		},
 		{

@@ -1,4 +1,5 @@
-export const BACKEND_URL = "http://localhost:3000";
+export const ORIGIN =
+	import.meta.env.MODE === "development" ? "http://localhost:3000" : window.location.origin;
 
 type Methods = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 type Options = {
@@ -8,10 +9,13 @@ type Options = {
 
 /*<---request configuration--->*/
 const request = (path: string, method: Methods, authorization: string, options?: Options) => {
-	const url = new URL(path, BACKEND_URL);
+	let url = `${ORIGIN}/${path}`;
 	if (options?.searchParams) {
-		for (let key of Object.keys(options?.searchParams))
-			url.searchParams.set(key, options?.searchParams[key] || "");
+		let searchParams = [];
+		for (let key of Object.keys(options?.searchParams)) {
+			searchParams.push(`${key}=${options?.searchParams[key]}`);
+		}
+		url = `${url}?${searchParams.join("&")}`;
 	}
 	return fetch(url, {
 		method,
@@ -28,10 +32,9 @@ const request = (path: string, method: Methods, authorization: string, options?:
 };
 
 const getAccessToken = async (refresh_token: string) => {
-	const res = await fetch(
-		`${BACKEND_URL}/api/v1/auth/access_token?refresh_token=${refresh_token}`,
-		{ method: "POST" },
-	);
+	const res = await fetch(`${ORIGIN}/api/v1/auth/access_token?refresh_token=${refresh_token}`, {
+		method: "POST",
+	});
 	const data: { access_token: string } = await res.json();
 	if (!res.ok || !data.access_token) {
 		throw data;

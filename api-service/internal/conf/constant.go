@@ -13,7 +13,7 @@ const (
 
 	USER_CTX_KEY string = "user_session"
 
-	RBMQ_EXCHANGE_API_SOCKET string = "exchange_api_socket"
+	RBMQ_EXCHANGE_API_SOCKET string = "exchange_api_socket" // exchange to push notifications from api service to socket service
 	RBMQ_KEY_ROOM_IO         string = "route_room_io"
 	RBMQ_KEY_NOTIFICATION    string = "route_notification"
 

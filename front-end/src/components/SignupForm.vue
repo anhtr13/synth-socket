@@ -2,7 +2,7 @@
 import { useRouter } from "vue-router";
 import { ref } from "vue";
 import { SignupSchema, type SignupPayload } from "@/types/auth";
-import { BACKEND_URL } from "@/utils/fetch";
+import { ORIGIN } from "@/utils/fetch";
 import IconApp from "@/components/icons/IconApp.vue";
 
 const router = useRouter();
@@ -34,7 +34,7 @@ const handleSubmit = () => {
 		}
 	}
 	if (result.data) {
-		fetch(`${BACKEND_URL}/api/v1/auth/signup`, {
+		fetch(`${ORIGIN}/api/v1/auth/signup`, {
 			method: "POST",
 			body: JSON.stringify(result.data),
 		})

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from "vue";
-import { _get } from "@/utils/fetch";
+import { _get, _post } from "@/utils/fetch";
 import { useUserInfoStore } from "@/stores/user";
 import type { UserInfo } from "@/types/user";
 import IconUserPlus from "@/components/icons/IconUserPlus.vue";
@@ -8,6 +8,7 @@ import IconUserChecked from "@/components/icons/IconUserChecked.vue";
 import IconArrowLeft from "@/components/icons/IconArrowLeft.vue";
 import IconUserAstronaut from "@/components/icons/IconUserAstronaut.vue";
 import IconClose from "@/components/icons/IconClose.vue";
+import { toast } from "vue3-toastify";
 
 const userInfoStore = useUserInfoStore();
 const title = ref<"Friends" | "Users">("Friends");
@@ -73,6 +74,18 @@ watch(title, (newValue) => {
 			});
 	}
 });
+
+function requestFriend(target_id: string) {
+	_post(`api/v1/user/${target_id}/friend_request`)
+		.then((data) => {
+			console.log(data);
+			toast.success("Success");
+		})
+		.catch((err) => {
+			toast.error(err.error);
+			console.error(err);
+		});
+}
 </script>
 
 <template>
@@ -162,6 +175,7 @@ watch(title, (newValue) => {
 				</div>
 				<button
 					v-else-if="user.user_id !== userInfoStore.info?.user_id"
+					@click="() => requestFriend(user.user_id)"
 					title="Add"
 					class="bg-violet-500/30 px-2 py-1 hover:bg-violet-500">
 					<IconUserPlus class="size-4" />
