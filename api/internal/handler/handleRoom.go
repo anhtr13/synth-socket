@@ -71,7 +71,7 @@ func HandleCreateRoom(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 	err = conf.RBMQ_Channel.Publish(
-		queue.EXCHANGE_API_SOCKET,
+		queue.EXCHANGE_API_TO_SOCKET,
 		queue.ROUTE_ROOM_IO,
 		false,
 		false,
@@ -262,7 +262,7 @@ func HandleLeaveRoom(w http.ResponseWriter, r *http.Request) {
 			Type:   queue.ROOM_OUT,
 		})
 	err = conf.RBMQ_Channel.Publish(
-		queue.EXCHANGE_API_SOCKET,
+		queue.EXCHANGE_API_TO_SOCKET,
 		queue.ROUTE_ROOM_IO,
 		false,
 		false,
@@ -355,7 +355,7 @@ func HandleAcceptRoomInvite(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 	err = conf.RBMQ_Channel.Publish(
-		queue.EXCHANGE_API_SOCKET,
+		queue.EXCHANGE_API_TO_SOCKET,
 		queue.ROUTE_ROOM_IO,
 		false,
 		false,
@@ -498,7 +498,7 @@ func HandleCreateRoomInvite(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 	err = conf.RBMQ_Channel.Publish(
-		queue.EXCHANGE_API_SOCKET,
+		queue.EXCHANGE_API_TO_SOCKET,
 		queue.ROUTE_NOTIFICATION,
 		false,
 		false,

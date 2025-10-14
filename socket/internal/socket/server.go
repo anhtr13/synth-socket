@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/anhtr13/synth-socket/api/pkgs/cache"
 	"github.com/coder/websocket"
 	"github.com/google/uuid"
 
-	"github.com/anhtr13/synth-socket/api/pkgs/cache"
 	"github.com/anhtr13/synth-socket/socket/internal/conf"
 	"github.com/anhtr13/synth-socket/socket/internal/util"
 )

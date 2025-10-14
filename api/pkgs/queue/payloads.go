@@ -29,3 +29,10 @@ type Notification struct {
 	Seen           bool             `json:"seen"`
 	CreatedAt      string           `json:"created_at"`
 }
+
+type NewMessage struct {
+	SenderId   string `json:"sender_id"`
+	ReceiverId string `json:"receiver_id"`
+	Text       string `json:"text"`
+	MediaUrl   string `json:"media_url"`
+}

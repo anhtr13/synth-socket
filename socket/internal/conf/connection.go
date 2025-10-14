@@ -5,10 +5,9 @@ import (
 	"log"
 	"time"
 
+	"github.com/anhtr13/synth-socket/api/pkgs/queue"
 	amqp "github.com/rabbitmq/amqp091-go"
 	redis "github.com/redis/go-redis/v9"
-
-	"github.com/anhtr13/synth-socket/api/pkgs/queue"
 )
 
 var (

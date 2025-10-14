@@ -130,7 +130,7 @@ func HandleCreateFriendRequest(w http.ResponseWriter, r *http.Request) {
 		},
 	)
 	err = conf.RBMQ_Channel.Publish(
-		queue.EXCHANGE_API_SOCKET,
+		queue.EXCHANGE_API_TO_SOCKET,
 		queue.ROUTE_NOTIFICATION,
 		false,
 		false,

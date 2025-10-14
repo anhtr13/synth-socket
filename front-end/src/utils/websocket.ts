@@ -23,6 +23,7 @@ export function initWsConnection(conn: WebSocket) {
 		console.log("websocket connected");
 	};
 	conn.onclose = function (event) {
+		alert("Websocket closed");
 		console.log("Connection closed:", event);
 	};
 	conn.onerror = function (event) {

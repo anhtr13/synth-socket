@@ -5,12 +5,10 @@ import (
 	"log"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgxpool"
-	amqp "github.com/rabbitmq/amqp091-go"
-	redis "github.com/redis/go-redis/v9"
-
 	"github.com/anhtr13/synth-socket/api/pkgs/database"
 	"github.com/anhtr13/synth-socket/api/pkgs/queue"
+	"github.com/jackc/pgx/v5/pgxpool"
+	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 var (
@@ -20,23 +18,12 @@ var (
 	RBMQ_Connection *amqp.Connection
 	RBMQ_Channel    *amqp.Channel
 
-	RD_Client *redis.Client
+	Queue_NewMessages amqp.Queue
 )
 
 func InitConnection() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-
-	rd_opt, err := redis.ParseURL(RD_URI)
-	if err != nil {
-		log.Fatal("Redis failed:", err)
-	}
-	RD_Client = redis.NewClient(rd_opt)
-	_, err = RD_Client.Ping(ctx).Result()
-	if err != nil {
-		log.Fatal("Could not connect to Redis:", err)
-	}
-	log.Println("Connected to redis")
 
 	db_conn, err := pgxpool.New(ctx, DB_URI)
 	if err != nil {
@@ -59,21 +46,42 @@ func InitConnection() {
 	log.Println("Connected to queue")
 
 	err = ch.ExchangeDeclare(
-		queue.EXCHANGE_API_TO_SOCKET, // name
-		"direct",                     // type
-		true,                         // durable
-		false,                        // auto-deleted
-		false,                        // internal
-		false,                        // no-wait
-		nil,                          // arguments
+		queue.EXCHANGE_API_SOCKET, // name
+		"direct",                  // type
+		true,                      // durable
+		false,                     // auto-deleted
+		false,                     // internal
+		false,                     // no-wait
+		nil,                       // arguments
 	)
 	if err != nil {
 		log.Fatal("Error when declare exchange:", err.Error())
 	}
+	q_new_messages, err := ch.QueueDeclare(
+		"",
+		false,
+		false,
+		true,
+		false,
+		nil,
+	)
+	if err != nil {
+		log.Fatal("Error when declare queue: ", err)
+	}
+	Queue_NewMessages = q_new_messages
+	err = ch.QueueBind(
+		Queue_NewMessages.Name,
+		queue.ROUTE_ROOM_IO,
+		queue.EXCHANGE_API_SOCKET,
+		false,
+		nil,
+	)
+	if err != nil {
+		log.Fatal("Error when bind queue: ", err)
+	}
 }
 
 func CloseAllConnections() {
-	RD_Client.Close()
 	RBMQ_Channel.Close()
 	RBMQ_Connection.Close()
 	DB_Connection.Close()

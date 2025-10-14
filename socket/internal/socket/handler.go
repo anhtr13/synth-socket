@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/anhtr13/synth-socket/api/pkgs/cache"
+	"github.com/anhtr13/synth-socket/api/pkgs/queue"
 	"github.com/coder/websocket"
 	"github.com/google/uuid"
 
-	"github.com/anhtr13/synth-socket/api/pkgs/cache"
-	"github.com/anhtr13/synth-socket/api/pkgs/queue"
 	"github.com/anhtr13/synth-socket/socket/internal/conf"
 	"github.com/anhtr13/synth-socket/socket/internal/util"
 )
