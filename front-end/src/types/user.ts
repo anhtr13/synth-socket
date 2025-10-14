@@ -5,12 +5,9 @@ export type UserInfo = {
 	is_friend?: boolean;
 };
 
-export type UserNoti = {
-	notification_id: string;
+export type RoomMemberInfo = {
 	user_id: string;
-	message: string;
-	type: "friend_request" | "room_invite";
-	id_ref: string;
-	seen: boolean;
-	created_at: string;
+	user_name: string;
+	profile_image: string | null;
+	joined_at: string;
 };

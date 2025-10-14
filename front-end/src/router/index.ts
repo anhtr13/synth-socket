@@ -1,25 +1,28 @@
 import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "@/views/HomeView.vue";
-import { useUserInfoStore } from "@/stores/user";
-import { _get } from "@/utils/fetch";
+import Room from "@/components/RoomChat/Room.vue";
 
 const router = createRouter({
 	history: createWebHistory(import.meta.env.BASE_URL),
 	routes: [
 		{
 			path: "/",
-			name: "home",
+			name: "home_view",
 			component: HomeView,
 			meta: { requireAuth: true },
 			children: [
-				{ path: "room", component: () => import("@/views/RoomView.vue") },
-				{ path: "user", name: "user", component: () => import("@/views/UserView.vue") },
+				{
+					path: "room/:room_id",
+					name: "room_id",
+					component: Room,
+				},
 			],
 		},
 		{
 			path: "/auth",
-			name: "auth",
+			name: "auth_view",
 			component: () => import("@/views/AuthView.vue"),
+			meta: { requireUnauthorize: true },
 			children: [
 				{
 					path: "login",
@@ -37,15 +40,18 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
-	const userStore = useUserInfoStore();
+	const refresh_token = localStorage.getItem("refresh_token");
 
-	if (to.meta.requiresAuth && userStore.info === null) {
-		// If the route requires authentication and the user is not authenticated, redirect to login
+	if (to.meta.requireAuth && !refresh_token) {
 		next({ name: "login" });
-	} else {
-		// Otherwise, allow navigation to proceed
-		next();
+		return;
 	}
+	if (to.meta.requireUnauthorize && refresh_token) {
+		next({ name: "home" });
+		return;
+	}
+
+	next();
 });
 
 export default router;

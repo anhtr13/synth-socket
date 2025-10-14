@@ -5,7 +5,7 @@ sql:
     queries: "sql/queries"
     gen:
       go:
-        out: "api-service/internal/database"
+        out: "api/pkgs/database"
         sql_package: "pgx/v5"
         emit_empty_slices: true
         emit_json_tags: true

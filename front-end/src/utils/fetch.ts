@@ -7,15 +7,11 @@ type Options = {
 	searchParams?: { [key: string]: string };
 };
 
-/*<---request configuration--->*/
+// ==============================
 const request = (path: string, method: Methods, authorization: string, options?: Options) => {
-	let url = `${ORIGIN}/${path}`;
-	if (options?.searchParams) {
-		let searchParams = [];
-		for (let key of Object.keys(options?.searchParams)) {
-			searchParams.push(`${key}=${options?.searchParams[key]}`);
-		}
-		url = `${url}?${searchParams.join("&")}`;
+	let url = new URL(path, ORIGIN);
+	for (let key in options?.searchParams) {
+		url.searchParams.set(key, options.searchParams[key] || "");
 	}
 	return fetch(url, {
 		method,
@@ -31,6 +27,7 @@ const request = (path: string, method: Methods, authorization: string, options?:
 	});
 };
 
+// ==============================
 const getAccessToken = async (refresh_token: string) => {
 	const res = await fetch(`${ORIGIN}/api/v1/auth/access_token?refresh_token=${refresh_token}`, {
 		method: "POST",
@@ -42,7 +39,6 @@ const getAccessToken = async (refresh_token: string) => {
 	return data.access_token;
 };
 
-/*<---handle token rotation--->*/
 const handleTokenRotation = async (path: string, method: Methods, options?: Options) => {
 	let access_token = localStorage.getItem("access_token");
 	let refresh_token = localStorage.getItem("refresh_token");
@@ -75,7 +71,7 @@ const handleTokenRotation = async (path: string, method: Methods, options?: Opti
 	return data;
 };
 
-/*<---client fetch funcion--->*/
+// ==============================
 export const _get = async (path: string, options?: Options) =>
 	handleTokenRotation(path, "GET", options);
 export const _post = (path: string, options?: Options) =>

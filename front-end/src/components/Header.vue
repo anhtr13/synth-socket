@@ -5,7 +5,7 @@ import { useContactBoxStore, type FocusingContact } from "@/stores/contact-box";
 import { useUserInfoStore } from "@/stores/user";
 import { _delete, _get, _patch, _post } from "@/utils/fetch";
 import { toast } from "vue3-toastify";
-import type { UserNoti } from "@/types/user";
+import type { SNotification } from "@/types/socket";
 import IconApp from "./icons/IconApp.vue";
 import IconFriend from "./icons/IconFriend.vue";
 import IconUserAstronaut from "./icons/IconUserAstronaut.vue";
@@ -18,7 +18,7 @@ const router = useRouter();
 const userInfoStore = useUserInfoStore();
 const contactBoxStore = useContactBoxStore();
 
-const notifications = ref<UserNoti[]>([]);
+const notifications = ref<SNotification[]>([]);
 const showSettingDropdown = ref(false);
 const showNotificationDropdown = ref(false);
 const chosenProfileImage = ref(userInfoStore.info?.profile_image || null);
@@ -67,7 +67,7 @@ function handleLogout() {
 		});
 }
 
-function handleNotificationAction(noti: UserNoti, action: "accept" | "reject") {
+function handleNotificationAction(noti: SNotification, action: "accept" | "reject") {
 	let path = `/api/v1/${noti.type}/${noti.id_ref}`;
 	if (action === "accept") {
 		_post(path)
@@ -113,7 +113,7 @@ function handleSaveNewAvatar() {
 
 <template>
 	<header
-		class="flex h-14 w-full items-center justify-between border-b border-neutral-700 bg-black sm:h-full sm:w-14 sm:flex-col sm:border-r sm:border-b-0">
+		class="flex h-14 w-full shrink-0 items-center justify-between border-b border-neutral-700 bg-black sm:h-full sm:w-14 sm:flex-col sm:border-r sm:border-b-0">
 		<nav class="flex h-auto w-auto items-center sm:flex-col">
 			<button
 				@click="handleHeaderClick('room')"
@@ -228,7 +228,7 @@ function handleSaveNewAvatar() {
 	<dialog
 		v-if="showProfileDialog"
 		class="z-20 flex h-screen w-screen items-center justify-center bg-transparent text-white backdrop-blur-lg">
-		<div class="relative flex w-full flex-col items-center border bg-black p-6 sm:w-[26rem]">
+		<div class="relative flex w-full max-w-[26rem] flex-col items-center border bg-black p-6">
 			<button
 				@click="
 					() => {

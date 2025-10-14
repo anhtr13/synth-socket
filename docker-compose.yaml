@@ -12,7 +12,7 @@ services:
       - POSTGRES_DB
       - HOST=postgres_service
     volumes:
-      - ./data/postgres_data:/var/lib/postgresql/data
+      - ./data/postgres:/var/lib/postgresql
     healthcheck:
       test: ["CMD", "pg_isready"]
       interval: 10s
@@ -24,7 +24,7 @@ services:
     restart: always
     container_name: rabbitmq_service
     volumes:
-      - "./data/rabbitmq_data:/var/lib/rabbitmq"
+      - "./data/rabbitmq:/var/lib/rabbitmq"
     environment:
       - HOST=rabbitmq_service
     healthcheck:
@@ -48,7 +48,7 @@ services:
       retries: 5
 
   api_service:
-    build: ./api-service
+    build: ./api
     container_name: api_service
     restart: always
     environment:
@@ -69,7 +69,7 @@ services:
         restart: true
 
   socket_service:
-    build: ./socket-service
+    build: ./socket
     container_name: socket_service
     restart: always
     environment:

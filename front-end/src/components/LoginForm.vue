@@ -1,24 +1,27 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import { _get, ORIGIN } from "@/utils/fetch";
+import { useUserInfoStore } from "@/stores/user";
 import { LoginSchema, type LoginPayload } from "@/types/auth";
-import { ORIGIN } from "@/utils/fetch";
 import IconApp from "@/components/icons/IconApp.vue";
 
 const router = useRouter();
+const userStore = useUserInfoStore();
 
 const data = ref<LoginPayload>({
 	user_email: "",
 	password: "",
 });
-
-const error_msg = ref<{ [key: string]: string }>({
+const validationErrors = ref<{ [key: string]: string }>({
 	user_email: "",
 	password: "",
 });
+const errMsg = ref("");
 
 const handleSubmit = () => {
-	error_msg.value = {
+	errMsg.value = "";
+	validationErrors.value = {
 		user_email: "",
 		password: "",
 	};
@@ -27,26 +30,33 @@ const handleSubmit = () => {
 		const err = JSON.parse(result.error.message);
 		console.log(err);
 		for (let e of err) {
-			error_msg.value[e.path[0]] = e.message;
+			validationErrors.value[e.path[0]] = e.message;
 		}
+		return;
 	}
-	if (result.data) {
-		fetch(`${ORIGIN}/api/v1/auth/login`, {
-			method: "POST",
-			body: JSON.stringify(result.data),
+	fetch(`${ORIGIN}/api/v1/auth/login`, {
+		method: "POST",
+		body: JSON.stringify(result.data),
+	})
+		.then(async (res) => {
+			const data = await res.json();
+			if (!res.ok) throw data;
+			localStorage.setItem("access_token", data.access_token);
+			localStorage.setItem("refresh_token", data.refresh_token);
 		})
-			.then(async (res) => {
-				const data = await res.json();
-				if (!res.ok) throw data;
-				console.log(data);
-				localStorage.setItem("access_token", data.access_token);
-				localStorage.setItem("refresh_token", data.refresh_token);
-				router.push("/");
-			})
-			.catch((err) => {
-				console.error(err);
+		.then(() => {
+			_get("/api/v1/me/info").then((data) => {
+				userStore.updateInfo(data);
 			});
-	}
+		})
+		.then(() => {
+			router.push("/");
+		})
+		.catch((err) => {
+			errMsg.value = err.error;
+			console.error(err);
+			return;
+		});
 };
 </script>
 
@@ -64,38 +74,45 @@ const handleSubmit = () => {
 		<div class="mt-6 flex w-full flex-col">
 			<div class="flex flex-col justify-start gap-y-1 pb-4">
 				<label
-					:class="error_msg.user_email === '' ? '' : 'text-red-500'"
+					:class="validationErrors.user_email === '' ? '' : 'text-red-500'"
 					for="email">
 					Email*
 				</label>
 				<input
 					class="h-9 px-2"
-					:class="error_msg.user_email === '' ? '' : 'border-red-500'"
+					:class="validationErrors.user_email === '' ? '' : 'border-red-500'"
 					v-model="data.user_email"
 					name="email" />
 				<small
-					v-if="error_msg.user_email"
+					v-if="validationErrors.user_email"
 					class="text-xs text-red-500">
-					{{ error_msg.user_email }}
+					{{ validationErrors.user_email }}
 				</small>
 			</div>
 			<div class="flex flex-col justify-start gap-y-1 pb-4">
 				<label
-					:class="error_msg.password === '' ? '' : 'text-red-500'"
+					:class="validationErrors.password === '' ? '' : 'text-red-500'"
 					for="password">
 					Password*
 				</label>
 				<input
 					class="h-9 px-2"
-					:class="error_msg.password === '' ? '' : 'border-red-500'"
+					:class="validationErrors.password === '' ? '' : 'border-red-500'"
 					v-model="data.password"
 					name="password"
 					type="password" />
 				<small
-					v-if="error_msg.password"
+					v-if="validationErrors.password"
 					class="text-xs text-red-500">
-					{{ error_msg.password }}
+					{{ validationErrors.password }}
 				</small>
+			</div>
+			<div
+				v-if="errMsg"
+				class="flex w-full items-center justify-center bg-red-500/30 px-3 py-2">
+				<span class="max-w-full break-all text-red-500">
+					{{ errMsg }}
+				</span>
 			</div>
 			<button
 				class="mt-4 h-10 w-full bg-violet-500 hover:bg-violet-500/70"

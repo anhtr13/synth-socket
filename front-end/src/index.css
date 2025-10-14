@@ -1,9 +1,5 @@
 @import "tailwindcss";
 
-* {
-  @apply shrink-0
-}
-
 body {
   @apply bg-neutral-900 text-white w-screen h-screen
 }
