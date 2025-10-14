@@ -9,8 +9,8 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/anhtr13/synth-socket/socket-service/internal/conf"
-	"github.com/anhtr13/synth-socket/socket-service/internal/socket"
+	"github.com/anhtr13/synth-socket/socket/internal/conf"
+	"github.com/anhtr13/synth-socket/socket/internal/socket"
 )
 
 func init() {

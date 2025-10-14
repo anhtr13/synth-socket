@@ -6,7 +6,7 @@ import (
 
 	jwt "github.com/golang-jwt/jwt/v5"
 
-	"github.com/anhtr13/synth-socket/api-service/internal/conf"
+	"github.com/anhtr13/synth-socket/api/internal/conf"
 )
 
 type JwtClaims struct {

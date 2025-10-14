@@ -8,10 +8,10 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 
-	"github.com/anhtr13/synth-socket/api-service/internal/conf"
-	"github.com/anhtr13/synth-socket/api-service/internal/util"
-	"github.com/anhtr13/synth-socket/api-service/pkgs/cache"
-	"github.com/anhtr13/synth-socket/api-service/pkgs/database"
+	"github.com/anhtr13/synth-socket/api/internal/conf"
+	"github.com/anhtr13/synth-socket/api/internal/util"
+	"github.com/anhtr13/synth-socket/api/pkgs/cache"
+	"github.com/anhtr13/synth-socket/api/pkgs/database"
 )
 
 func HandleGetFriends(w http.ResponseWriter, r *http.Request) {

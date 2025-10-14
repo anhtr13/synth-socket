@@ -8,7 +8,7 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 	redis "github.com/redis/go-redis/v9"
 
-	"github.com/anhtr13/synth-socket/api-service/pkgs/queue"
+	"github.com/anhtr13/synth-socket/api/pkgs/queue"
 )
 
 var (

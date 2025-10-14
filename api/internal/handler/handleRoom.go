@@ -10,11 +10,11 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	amqp "github.com/rabbitmq/amqp091-go"
 
-	"github.com/anhtr13/synth-socket/api-service/internal/conf"
-	"github.com/anhtr13/synth-socket/api-service/internal/util"
-	"github.com/anhtr13/synth-socket/api-service/pkgs/cache"
-	"github.com/anhtr13/synth-socket/api-service/pkgs/database"
-	"github.com/anhtr13/synth-socket/api-service/pkgs/queue"
+	"github.com/anhtr13/synth-socket/api/internal/conf"
+	"github.com/anhtr13/synth-socket/api/internal/util"
+	"github.com/anhtr13/synth-socket/api/pkgs/cache"
+	"github.com/anhtr13/synth-socket/api/pkgs/database"
+	"github.com/anhtr13/synth-socket/api/pkgs/queue"
 )
 
 func HandleCreateRoom(w http.ResponseWriter, r *http.Request) {

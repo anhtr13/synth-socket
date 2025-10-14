@@ -3,7 +3,7 @@ package util
 import (
 	"net/http"
 
-	"github.com/anhtr13/synth-socket/api-service/internal/conf"
+	"github.com/anhtr13/synth-socket/api/internal/conf"
 )
 
 func SetCookie(w http.ResponseWriter, key, value string) {

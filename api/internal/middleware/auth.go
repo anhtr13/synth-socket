@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/anhtr13/synth-socket/api-service/internal/conf"
-	"github.com/anhtr13/synth-socket/api-service/internal/util"
+	"github.com/anhtr13/synth-socket/api/internal/conf"
+	"github.com/anhtr13/synth-socket/api/internal/util"
 )
 
 func Auth(next http.Handler) http.Handler {

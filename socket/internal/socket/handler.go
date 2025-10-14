@@ -9,10 +9,10 @@ import (
 	"github.com/coder/websocket"
 	"github.com/google/uuid"
 
-	"github.com/anhtr13/synth-socket/api-service/pkgs/cache"
-	"github.com/anhtr13/synth-socket/api-service/pkgs/queue"
-	"github.com/anhtr13/synth-socket/socket-service/internal/conf"
-	"github.com/anhtr13/synth-socket/socket-service/internal/util"
+	"github.com/anhtr13/synth-socket/api/pkgs/cache"
+	"github.com/anhtr13/synth-socket/api/pkgs/queue"
+	"github.com/anhtr13/synth-socket/socket/internal/conf"
+	"github.com/anhtr13/synth-socket/socket/internal/util"
 )
 
 func (s *SocketServer) HandleSocketConnection(w http.ResponseWriter, r *http.Request) {

@@ -9,9 +9,9 @@ import (
 	"github.com/coder/websocket"
 	"github.com/google/uuid"
 
-	"github.com/anhtr13/synth-socket/socket-service/internal/cache"
-	"github.com/anhtr13/synth-socket/socket-service/internal/conf"
-	"github.com/anhtr13/synth-socket/socket-service/internal/util"
+	"github.com/anhtr13/synth-socket/api/pkgs/cache"
+	"github.com/anhtr13/synth-socket/api/pkgs/util"
+	"github.com/anhtr13/synth-socket/socket/internal/conf"
 )
 
 type SocketServer struct {

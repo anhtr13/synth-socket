@@ -3,8 +3,8 @@ package handler
 import (
 	"net/http"
 
-	"github.com/anhtr13/synth-socket/api-service/internal/guard"
-	"github.com/anhtr13/synth-socket/api-service/internal/middleware"
+	"github.com/anhtr13/synth-socket/api/internal/guard"
+	"github.com/anhtr13/synth-socket/api/internal/middleware"
 )
 
 func RegisterRoutes() http.Handler {

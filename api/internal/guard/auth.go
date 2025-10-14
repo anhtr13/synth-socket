@@ -3,8 +3,8 @@ package guard
 import (
 	"net/http"
 
-	"github.com/anhtr13/synth-socket/api-service/internal/conf"
-	"github.com/anhtr13/synth-socket/api-service/internal/util"
+	"github.com/anhtr13/synth-socket/api/internal/conf"
+	"github.com/anhtr13/synth-socket/api/internal/util"
 )
 
 func Auth(handler http.HandlerFunc) http.HandlerFunc {

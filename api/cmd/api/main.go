@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/anhtr13/synth-socket/api-service/internal/handler"
-	"github.com/anhtr13/synth-socket/api-service/internal/conf"
+	"github.com/anhtr13/synth-socket/api/internal/handler"
+	"github.com/anhtr13/synth-socket/api/internal/conf"
 )
 
 func init() {

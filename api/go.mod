@@ -1,4 +1,4 @@
-module github.com/anhtr13/synth-socket/api-service
+module github.com/anhtr13/synth-socket/api
 
 go 1.24.1
 
