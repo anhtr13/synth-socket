@@ -10,8 +10,8 @@ import (
 	"github.com/google/uuid"
 
 	"github.com/anhtr13/synth-socket/api/pkgs/cache"
-	"github.com/anhtr13/synth-socket/api/pkgs/util"
 	"github.com/anhtr13/synth-socket/socket/internal/conf"
+	"github.com/anhtr13/synth-socket/socket/internal/util"
 )
 
 type SocketServer struct {
