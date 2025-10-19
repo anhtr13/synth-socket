@@ -6,6 +6,14 @@ VALUES
 RETURNING
 	*;
 
+-- name: UpdateRoomLastMessage :exec
+UPDATE rooms
+SET
+	last_message = $1,
+	updated_at = $2
+WHERE
+	room_id = $3;
+
 -- name: FindRoomById :one
 SELECT
 	*
@@ -55,9 +63,7 @@ OFFSET
 -- name: GetRoomsDataByMemberIdAndRoomName :many
 SELECT
 	r.*,
-	rm.joined_at,
-	u.user_name AS owner_name,
-	u.profile_image AS owner_image
+	rm.joined_at
 FROM
 	(
 		SELECT
@@ -66,13 +72,12 @@ FROM
 			room_members
 		WHERE
 			member_id = $1
-		ORDER BY
-			joined_at DESC
 	) rm
 	LEFT JOIN rooms r ON rm.room_id = r.room_id
-	LEFT JOIN users u ON r.created_by = u.user_id
 WHERE
 	r.room_name LIKE ('%' || sqlc.arg (name) || '%')
+ORDER BY
+	r.room_name
 LIMIT
 	$2
 OFFSET
@@ -81,9 +86,7 @@ OFFSET
 -- name: GetRoomsDataByMemberId :many
 SELECT
 	r.*,
-	rm.joined_at,
-	u.user_name AS owner_name,
-	u.profile_image AS owner_image
+	rm.joined_at
 FROM
 	(
 		SELECT
@@ -92,12 +95,11 @@ FROM
 			room_members
 		WHERE
 			member_id = $1
-		ORDER BY
-			joined_at DESC
-		LIMIT
-			$2
-		OFFSET
-			$3
 	) rm
 	LEFT JOIN rooms r ON rm.room_id = r.room_id
-	LEFT JOIN users u ON r.created_by = u.user_id;
+ORDER BY
+	r.updated_at DESC
+LIMIT
+	$2
+OFFSET
+	$3;

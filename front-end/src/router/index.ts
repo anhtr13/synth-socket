@@ -1,13 +1,13 @@
 import { createRouter, createWebHistory } from "vue-router";
 import HomeView from "@/views/HomeView.vue";
-import Room from "@/components/RoomChat/Room.vue";
+import Room from "@/components/ChatRoom/ChatRoom.vue";
 
 const router = createRouter({
 	history: createWebHistory(import.meta.env.BASE_URL),
 	routes: [
 		{
 			path: "/",
-			name: "home_view",
+			name: "home",
 			component: HomeView,
 			meta: { requireAuth: true },
 			children: [
@@ -20,9 +20,8 @@ const router = createRouter({
 		},
 		{
 			path: "/auth",
-			name: "auth_view",
+			name: "auth",
 			component: () => import("@/views/AuthView.vue"),
-			meta: { requireUnauthorize: true },
 			children: [
 				{
 					path: "login",
@@ -44,10 +43,6 @@ router.beforeEach(async (to, from, next) => {
 
 	if (to.meta.requireAuth && !refresh_token) {
 		next({ name: "login" });
-		return;
-	}
-	if (to.meta.requireUnauthorize && refresh_token) {
-		next({ name: "home" });
 		return;
 	}
 

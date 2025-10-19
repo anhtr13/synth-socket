@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/anhtr13/synth-socket/api/internal/handler"
+	"github.com/anhtr13/synth-socket/api/internal/api/handler"
 	"github.com/anhtr13/synth-socket/api/internal/conf"
 )
 

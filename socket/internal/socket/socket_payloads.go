@@ -1,40 +1,27 @@
 package socket
 
-type SEvent string
+type Event string
 
 const (
-	EVENT_ERROR        SEvent = "error"
-	EVENT_MESSAGE      SEvent = "message"
-	EVENT_NOTIFICATION SEvent = "notification"
-	EVENT_ROOM_IO      SEvent = "room_io"
-)
-
-type RoomIoType string
-
-const (
-	ROOM_IN  RoomIoType = "room_in"
-	ROOM_OUT RoomIoType = "room_out"
+	EVENT_MESSAGE      Event = "message"
+	EVENT_NOTIFICATION Event = "notification"
 )
 
 type NotificationType string
 
 const (
-	REQ_FRIEND NotificationType = "friend_request"
-	REQ_ROOM   NotificationType = "room_request"
+	REQ_FRIEND  NotificationType = "friend_request"
+	ROOM_INVITE NotificationType = "room_invite"
 )
 
-type SError struct {
-	Error string `json:"error"`
-}
-
-type SMessage struct {
+type Message struct {
 	SenderId   string `json:"sender_id"`
 	ReceiverId string `json:"receiver_id"`
 	Text       string `json:"text"`
 	MediaUrl   string `json:"media_url"`
 }
 
-type SNotification struct {
+type Notification struct {
 	NotificationId string           `json:"notification_id"`
 	UserId         string           `json:"user_id"`
 	Message        string           `json:"message"`
@@ -44,13 +31,7 @@ type SNotification struct {
 	CreatedAt      string           `json:"created_at"`
 }
 
-type SRoomIo struct {
-	UserId string     `json:"user_id"`
-	RoomId string     `json:"room_id"`
-	Type   RoomIoType `json:"type"`
-}
-
-type SPayload struct {
-	Event SEvent `json:"event"`
-	Data  any    `json:"data"` // SMessage | SError | SRoomIo | SNotification
+type BroadcastPayload struct {
+	Event Event `json:"event"`
+	Data  any   `json:"data"` // Message | Notification
 }

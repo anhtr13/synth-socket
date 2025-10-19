@@ -12,7 +12,7 @@ services:
       - POSTGRES_DB
       - HOST=postgres_service
     volumes:
-      - ./data/postgres:/var/lib/postgresql
+      - ./_data/postgres:/var/lib/postgresql
     healthcheck:
       test: ["CMD", "pg_isready"]
       interval: 10s
@@ -24,7 +24,7 @@ services:
     restart: always
     container_name: rabbitmq_service
     volumes:
-      - "./data/rabbitmq:/var/lib/rabbitmq"
+      - "./_data/rabbitmq:/var/lib/rabbitmq"
     environment:
       - HOST=rabbitmq_service
     healthcheck:
@@ -89,6 +89,22 @@ services:
         condition: service_healthy
         restart: true
 
+  cron_job:
+    build: ./cron
+    container_name: "cron_job"
+    restart: always
+    environment:
+      - DB_URI
+      - RBMQ_URI
+      - HOST=cron_job_service
+    depends_on:
+      postgres_service:
+        condition: service_healthy
+        restart: true
+      rabbitmq_service:
+        condition: service_healthy
+        restart: true
+
   nginx:
     build: .
     container_name: nginx
@@ -100,3 +116,4 @@ services:
     depends_on:
       - api_service
       - socket_service
+      - cron_job

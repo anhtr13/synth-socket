@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/anhtr13/synth-socket/api/pkgs/queue"
+	"github.com/anhtr13/synth-socket/socket/internal/queue"
 	amqp "github.com/rabbitmq/amqp091-go"
 	redis "github.com/redis/go-redis/v9"
 )
@@ -49,7 +49,20 @@ func InitConnection() {
 
 	// ========== ExchangeDeclare ==========
 	err = ch.ExchangeDeclare(
-		queue.EXCHANGE_API_SOCKET,
+		queue.EXCHANGE_SOCKET_TO_CRON, // name
+		"direct",                      // type
+		true,                          // durable
+		false,                         // auto-deleted
+		false,                         // internal
+		false,                         // no-wait
+		nil,                           // arguments
+	)
+	if err != nil {
+		log.Fatal("Error when declare exchange:", err.Error())
+	}
+
+	err = ch.ExchangeDeclare(
+		queue.EXCHANGE_API_TO_SOCKET,
 		"direct",
 		true,
 		false,
@@ -92,7 +105,7 @@ func InitConnection() {
 	err = ch.QueueBind(
 		Queue_RoomIO.Name,
 		queue.ROUTE_ROOM_IO,
-		queue.EXCHANGE_API_SOCKET,
+		queue.EXCHANGE_API_TO_SOCKET,
 		false,
 		nil,
 	)
@@ -102,7 +115,7 @@ func InitConnection() {
 	err = ch.QueueBind(
 		Queue_Notification.Name,
 		queue.ROUTE_NOTIFICATION,
-		queue.EXCHANGE_API_SOCKET,
+		queue.EXCHANGE_API_TO_SOCKET,
 		false,
 		nil,
 	)

@@ -60,7 +60,7 @@ func (u *User) CountClients() int {
 	return res
 }
 
-func (u *User) Broadcast(msg SPayload) {
+func (u *User) Broadcast(msg BroadcastPayload) {
 	u.Mtx.RLock()
 	defer u.Mtx.RUnlock()
 	for _, c := range u.Clients {

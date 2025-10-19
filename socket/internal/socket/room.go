@@ -60,7 +60,7 @@ func (r *Room) CountMembers() int {
 	return res
 }
 
-func (r *Room) Broadcast(msg SPayload) {
+func (r *Room) Broadcast(msg BroadcastPayload) {
 	r.Mtx.RLock()
 	defer r.Mtx.RUnlock()
 	for _, u := range r.Members {

@@ -2,12 +2,12 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { _get, ORIGIN } from "@/utils/fetch";
-import { useUserInfoStore } from "@/stores/user";
+import { usePersonalStore } from "@/stores/personal";
 import { LoginSchema, type LoginPayload } from "@/types/auth";
 import IconApp from "@/components/icons/IconApp.vue";
 
 const router = useRouter();
-const userStore = useUserInfoStore();
+const personalStore = usePersonalStore();
 
 const data = ref<LoginPayload>({
 	user_email: "",
@@ -46,7 +46,7 @@ const handleSubmit = () => {
 		})
 		.then(() => {
 			_get("/api/v1/me/info").then((data) => {
-				userStore.updateInfo(data);
+				personalStore.info = data;
 			});
 		})
 		.then(() => {

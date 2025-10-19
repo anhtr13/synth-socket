@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/anhtr13/synth-socket/api/pkgs/cache"
 	"github.com/coder/websocket"
 	"github.com/google/uuid"
 
+	"github.com/anhtr13/synth-socket/socket/internal/cache"
 	"github.com/anhtr13/synth-socket/socket/internal/conf"
 	"github.com/anhtr13/synth-socket/socket/internal/util"
 )
@@ -91,11 +91,12 @@ func (s *SocketServer) initClient(client_conn *websocket.Conn, user_id uuid.UUID
 
 func (s *SocketServer) cleanUpClient(client *Client, user *User) {
 	user.RemoveClient(client)
+
 	if user.CountClients() == 0 {
 		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 		defer cancel()
 
-		user_rooms, err := conf.RD_Client.SMembers(
+		room_ids, err := conf.RD_Client.SMembers(
 			ctx,
 			fmt.Sprintf("%s:%s:%s", cache.KEY_USER, user.UserId.String(), cache.USER_ROOMS),
 		).Result()
@@ -103,12 +104,12 @@ func (s *SocketServer) cleanUpClient(client *Client, user *User) {
 			return
 		}
 
-		for _, id := range user_rooms {
-			room_id, err := uuid.Parse(id)
+		for _, r_id := range room_ids {
+			r_uuid, err := uuid.Parse(r_id)
 			if err != nil {
 				continue
 			}
-			room := s.RoomPool.GetRoom(room_id)
+			room := s.RoomPool.GetRoom(r_uuid)
 			if room == nil {
 				continue
 			}
@@ -117,6 +118,9 @@ func (s *SocketServer) cleanUpClient(client *Client, user *User) {
 				s.RoomPool.RemoveRoom(room)
 			}
 		}
+
+		s.UserPool.RemoveUser(user)
+
 		conf.RD_Client.Set(
 			ctx,
 			fmt.Sprintf("%s:%s:%s", cache.KEY_USER, user.UserId.String(), cache.USER_STATUS),

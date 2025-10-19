@@ -1,41 +1,62 @@
 <script setup lang="ts">
-import { onBeforeMount } from "vue";
+import { onBeforeMount, onBeforeUnmount, onMounted, watch } from "vue";
 import { useRouter } from "vue-router";
-import { useUserInfoStore } from "@/stores/user";
-import { useWsConnectionStore } from "@/stores/ws-connection";
+import { usePersonalStore } from "@/stores/personal";
+import { useWebSocketStore } from "@/stores/websocket";
 import { _get } from "@/utils/fetch";
-import { createWs, initWsConnection } from "@/utils/websocket";
 import Header from "@/components/Header.vue";
 import ContactBox from "@/components/ContactBox/ContactBox.vue";
 
-const router = useRouter();
-const userStore = useUserInfoStore();
-const connectionStore = useWsConnectionStore();
+const HOST = import.meta.env.MODE === "development" ? "localhost:3000" : window.location.host;
 
-onBeforeMount(() => {
-	if (!userStore.info) {
+const router = useRouter();
+const personalStore = usePersonalStore();
+const webSocketStore = useWebSocketStore();
+
+onBeforeMount(async () => {
+	if (!personalStore.info) {
 		_get("/api/v1/me/info")
 			.then((data) => {
-				userStore.updateInfo(data);
-				const conn = createWs();
-				if (conn === null) {
-					alert("Failed to connect WebSockets.");
-					return;
-				}
-				initWsConnection(conn);
-				connectionStore.connection = conn;
+				personalStore.info = data;
 			})
 			.catch((err) => {
-				userStore.updateInfo(null);
-				console.error(err);
+				personalStore.info = null;
+				console.error("here", err);
 				router.push("/auth/login");
 			});
 	}
 });
+
+watch(
+	() => personalStore.info,
+	(info) => {
+		if (info) {
+			if (!window["WebSocket"]) {
+				alert("Your browser does not support WebSockets.");
+				return null;
+			}
+			var access_token = window.localStorage.getItem("access_token");
+			if (!access_token) {
+				alert("Cannot connect to WebSocket server: access_token not found");
+				return null;
+			}
+			var protocol = "ws://";
+			if (window.location.protocol === "https:") {
+				protocol = "wss://";
+			}
+			const url = protocol + HOST + "/ws?access_token=" + access_token;
+			webSocketStore.connect(url);
+		}
+	},
+);
+
+onBeforeUnmount(() => {
+	webSocketStore.disconnect();
+});
 </script>
 
 <template>
-	<template v-if="userStore.info">
+	<template v-if="personalStore.info">
 		<Header />
 		<main class="relative flex h-auto w-auto grow flex-col sm:flex-row">
 			<ContactBox />

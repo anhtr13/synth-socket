@@ -9,8 +9,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/anhtr13/synth-socket/api/internal/cache"
 	"github.com/anhtr13/synth-socket/api/internal/conf"
-	"github.com/anhtr13/synth-socket/api/pkgs/cache"
 )
 
 // load all user's friendships, user's rooms to redis
@@ -87,7 +87,7 @@ func gracefulShutdown(apiServer *http.Server, done chan bool) {
 	defer stop()
 
 	<-ctx.Done()
-	log.Println("shutting down gracefully, press Ctrl+C again to force")
+	log.Println("Shutting down gracefully, press Ctrl+C again to force")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()

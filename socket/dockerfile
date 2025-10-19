@@ -5,13 +5,13 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o main ./cmd/socket 
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o socket ./cmd/socket 
 
 
 # RUNNER --------------------------------
 FROM alpine:latest AS runner
 WORKDIR /app
 
-COPY --from=builder /app/main ./
+COPY --from=builder /app/socket ./
 
-ENTRYPOINT ["./main"]
+ENTRYPOINT ["./socket"]

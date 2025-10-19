@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import { useContactBoxStore, type FocusingContact } from "@/stores/contact-box";
-import { useUserInfoStore } from "@/stores/user";
+import { usePersonalStore } from "@/stores/personal";
+import { useGlobalStateStore, type FocusingHeader } from "@/stores/global_state";
+import { useNotificationStore } from "@/stores/notifications";
+import { useRecentUpdatedStore } from "@/stores/recent_updated";
 import { _delete, _get, _patch, _post } from "@/utils/fetch";
 import { toast } from "vue3-toastify";
 import type { SNotification } from "@/types/socket";
@@ -13,20 +15,23 @@ import IconEdit from "./icons/IconEdit.vue";
 import IconLogout from "./icons/IconLogout.vue";
 import IconBell from "./icons/IconBell.vue";
 import IconClose from "./icons/IconClose.vue";
+import type { FriendshipInfo, UserInfo } from "@/types/user";
+import type { Room } from "@/types/room";
 
 const router = useRouter();
-const userInfoStore = useUserInfoStore();
-const contactBoxStore = useContactBoxStore();
+const personalStore = usePersonalStore();
+const globalStateStore = useGlobalStateStore();
+const notificationStore = useNotificationStore();
+const recentUpdatedStore = useRecentUpdatedStore();
 
-const notifications = ref<SNotification[]>([]);
 const showSettingDropdown = ref(false);
 const showNotificationDropdown = ref(false);
-const chosenProfileImage = ref(userInfoStore.info?.profile_image || null);
+const chosenProfileImage = ref(personalStore.info?.profile_image || null);
 const showProfileDialog = ref(false);
 
 const notiCount = computed(() => {
 	let count = 0;
-	notifications.value.forEach((noti) => {
+	notificationStore.notifications.forEach((noti) => {
 		if (!noti.seen) {
 			count++;
 		}
@@ -38,26 +43,26 @@ onMounted(() => {
 	_get("/api/v1/notification")
 		.then((data) => {
 			console.log("notifications:", data);
-			notifications.value = data;
+			notificationStore.notifications = data;
 		})
 		.catch((err) => {
 			toast.error(err.error);
 		});
 });
 
-function handleHeaderClick(element: FocusingContact) {
-	if (contactBoxStore.focusing === element) {
-		contactBoxStore.toggleMobileDropdown();
+function handleHeaderClick(element: FocusingHeader) {
+	if (globalStateStore.focusingHeader === element) {
+		globalStateStore.toggleHeaderMobileDropdown();
 	} else {
-		contactBoxStore.focusing = element;
-		contactBoxStore.showMobileDropdown = true;
+		globalStateStore.focusingHeader = element;
+		globalStateStore.showHeaderMobileDropdown = true;
 	}
 }
 
 function handleLogout() {
 	_post("/api/v1/auth/logout")
 		.then(() => {
-			userInfoStore.updateInfo(null);
+			personalStore.info = null;
 			localStorage.removeItem("access_token");
 			localStorage.removeItem("refresh_token");
 			router.push("/auth/login");
@@ -67,30 +72,54 @@ function handleLogout() {
 		});
 }
 
-function handleNotificationAction(noti: SNotification, action: "accept" | "reject") {
-	let path = `/api/v1/${noti.type}/${noti.id_ref}`;
-	if (action === "accept") {
-		_post(path)
-			.then(() => {
-				toast.success("Success!");
-			})
-			.catch((err) => {
-				console.error(err);
-				toast.error(err.error);
-			});
-	} else {
-		_delete(path)
-			.then(() => {
-				toast.success("Success!");
-			})
-			.catch((err) => {
-				console.error(err);
-				toast.error(err.error);
-			});
+async function handleFriendRequest(action: "accept" | "reject", noti: SNotification) {
+	try {
+		if (action === "accept") {
+			const friendship: FriendshipInfo = await _post(`/api/v1/friend_request/${noti.id_ref}`);
+			const user: UserInfo = await _get(
+				`/api/v1/user/${personalStore.info!.user_id === friendship.user1_id ? friendship.user2_id : friendship.user1_id}`,
+			);
+			recentUpdatedStore.friendSet.set(user.user_id, user);
+			toast.success("Success!");
+		} else {
+			await _delete(`/api/v1/friend_request/${noti.id_ref}`);
+			toast.success("Success!");
+		}
+		_post(`/api/v1/notification/${noti.notification_id}`).then(() => {
+			noti.seen = true;
+		});
+	} catch (err: any) {
+		toast.error(err.error);
+		console.error(err);
 	}
-	_post(`/api/v1/notification/${noti.notification_id}`).then(() => {
-		noti.seen = true;
-	});
+}
+
+async function handleRoomInvite(action: "accept" | "reject", noti: SNotification) {
+	try {
+		if (action === "accept") {
+			const room_member = await _post(`/api/v1/room_invite/${noti.id_ref}`);
+			const room: Room = await _get(`/api/v1/room/all/${room_member.room_id}`);
+			recentUpdatedStore.roomSet.set(room.room_id, room);
+			toast.success("Success!");
+		} else {
+			await _delete(`/api/v1/friend_request/${noti.id_ref}`);
+			toast.success("Success!");
+		}
+		_post(`/api/v1/notification/${noti.notification_id}`).then(() => {
+			noti.seen = true;
+		});
+	} catch (err: any) {
+		toast.error(err.error);
+		console.error(err);
+	}
+}
+
+function handleNotification(noti: SNotification, action: "accept" | "reject") {
+	if (noti.type === "friend_request") {
+		handleFriendRequest(action, noti);
+	} else {
+		handleRoomInvite(action, noti);
+	}
 }
 
 function handleSaveNewAvatar() {
@@ -100,7 +129,7 @@ function handleSaveNewAvatar() {
 		},
 	})
 		.then(() => {
-			userInfoStore.info!.profile_image = chosenProfileImage.value;
+			personalStore.info!.profile_image = chosenProfileImage.value;
 			showProfileDialog.value = false;
 			toast.success("Success!");
 		})
@@ -118,13 +147,13 @@ function handleSaveNewAvatar() {
 			<button
 				@click="handleHeaderClick('room')"
 				class="ml-3 flex size-8 items-center justify-center hover:text-violet-500 sm:mt-4 sm:ml-0"
-				:class="contactBoxStore.focusing === 'room' ? 'text-violet-500' : ''">
+				:class="globalStateStore.focusingHeader === 'room' ? 'text-violet-500' : ''">
 				<IconApp class="size-6" />
 			</button>
 			<button
 				@click="handleHeaderClick('friend')"
 				class="ml-2 flex size-8 items-center justify-center hover:text-violet-500 sm:mt-2 sm:ml-0"
-				:class="contactBoxStore.focusing === 'friend' ? 'text-violet-500' : ''">
+				:class="globalStateStore.focusingHeader === 'friend' ? 'text-violet-500' : ''">
 				<IconFriend class="size-5" />
 			</button>
 		</nav>
@@ -143,16 +172,16 @@ function handleSaveNewAvatar() {
 				</button>
 				<div
 					v-if="showNotificationDropdown"
-					class="thin-scrollbar absolute top-12 right-2 z-10 flex max-h-96 w-72 flex-col overflow-y-auto border border-neutral-700 bg-black p-3 sm:top-auto sm:right-auto sm:bottom-2 sm:left-12">
+					class="thin-scrollbar absolute top-12 right-2 z-10 flex max-h-96 w-72 flex-col-reverse overflow-y-auto border border-neutral-700 bg-black p-3 sm:top-auto sm:right-auto sm:bottom-2 sm:left-12">
 					<span
-						v-if="notifications.length === 0"
+						v-if="notificationStore.notifications.length === 0"
 						class="text-sm text-neutral-400">
 						Notification is empty
 					</span>
 					<div
 						class="w-full px-3 py-2 text-start hover:bg-neutral-900"
 						:title="noti.message"
-						v-for="noti in notifications">
+						v-for="noti in notificationStore.notifications">
 						<span class="mb-1 line-clamp-2 w-full font-semibold break-all">
 							{{ noti.message }}
 						</span>
@@ -160,12 +189,12 @@ function handleSaveNewAvatar() {
 							v-if="!noti.seen"
 							class="flex gap-x-2">
 							<button
-								@click="() => handleNotificationAction(noti, 'accept')"
+								@click="() => handleNotification(noti, 'accept')"
 								class="h-8 w-20 bg-violet-500 text-sm hover:bg-violet-500/70">
 								Accept
 							</button>
 							<button
-								@click="() => handleNotificationAction(noti, 'reject')"
+								@click="() => handleNotification(noti, 'reject')"
 								class="h-8 w-20 bg-violet-500 text-sm hover:bg-violet-500/70">
 								Reject
 							</button>
@@ -178,30 +207,30 @@ function handleSaveNewAvatar() {
 				class="mr-3 flex size-8 items-center justify-center sm:mr-0 sm:mb-4">
 				<button
 					@click="showSettingDropdown = !showSettingDropdown"
-					v-if="!userInfoStore.info || !userInfoStore.info.profile_image"
+					v-if="!personalStore.info || !personalStore.info.profile_image"
 					class="hover:text-violet-500">
 					<IconUserAstronaut class="size-5" />
 				</button>
 				<button
 					@click="showSettingDropdown = !showSettingDropdown"
-					v-if="userInfoStore.info?.profile_image">
+					v-if="personalStore.info?.profile_image">
 					<img
 						class="size-6 object-cover"
-						:src="userInfoStore.info.profile_image" />
+						:src="personalStore.info.profile_image" />
 				</button>
 				<div
 					v-if="showSettingDropdown"
 					class="absolute top-12 right-2 z-10 flex w-64 flex-col border border-neutral-700 bg-black p-4 sm:top-auto sm:right-auto sm:bottom-2 sm:left-12">
 					<div class="flex items-center gap-3 bg-neutral-900 px-4 py-4">
 						<img
-							v-if="userInfoStore.info?.profile_image"
+							v-if="personalStore.info?.profile_image"
 							class="size-12 object-cover"
-							:src="userInfoStore.info.profile_image" />
+							:src="personalStore.info.profile_image" />
 						<IconUserAstronaut
-							v-if="!userInfoStore.info?.profile_image"
+							v-if="!personalStore.info?.profile_image"
 							class="size-12" />
 						<div class="flex flex-col gap-0">
-							<h3 class="text-xl font-bold">{{ userInfoStore.info?.user_name }}</h3>
+							<h3 class="text-xl font-bold">{{ personalStore.info?.user_name }}</h3>
 							<span class="text-xs text-neutral-300">online</span>
 						</div>
 					</div>
@@ -232,7 +261,7 @@ function handleSaveNewAvatar() {
 			<button
 				@click="
 					() => {
-						chosenProfileImage = userInfoStore.info?.profile_image || null;
+						chosenProfileImage = personalStore.info?.profile_image || null;
 						showProfileDialog = false;
 					}
 				"
@@ -246,7 +275,7 @@ function handleSaveNewAvatar() {
 			<IconUserAstronaut
 				v-else
 				class="size-12" />
-			<h3 class="mt-1 text-xl font-bold">{{ userInfoStore.info?.user_name }}</h3>
+			<h3 class="mt-1 text-xl font-bold">{{ personalStore.info?.user_name }}</h3>
 			<p class="mt-4 text-sm text-neutral-400">Change your avatar</p>
 			<div class="mt-2 flex w-full flex-wrap items-center justify-center gap-2 px-6">
 				<button

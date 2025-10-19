@@ -5,4 +5,5 @@ export type Room = {
 	created_by: string;
 	created_at: string;
 	joined_at: string;
+	seen_last_message?: boolean;
 };

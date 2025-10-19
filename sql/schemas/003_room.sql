@@ -4,6 +4,7 @@ CREATE TABLE rooms (
 	room_name varchar(255) NOT NULL,
 	room_picture varchar(255),
 	created_by uuid NOT NULL REFERENCES users (user_id),
+	updated_at timestamp without time zone DEFAULT now(),
 	created_at timestamp without time zone DEFAULT now(),
 	UNIQUE (room_name, created_by)
 );

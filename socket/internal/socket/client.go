@@ -8,7 +8,6 @@ import (
 	"github.com/google/uuid"
 )
 
-// A user can connect on multiple devices, each connection represented by a "Client"
 type Client struct {
 	ClientId uuid.UUID
 	UserId   uuid.UUID
@@ -23,7 +22,7 @@ func NewClient(user_id uuid.UUID, client_conn *websocket.Conn) *Client {
 	}
 }
 
-func (c *Client) WriteMsg(msg SPayload) error {
+func (c *Client) WriteMsg(msg BroadcastPayload) error {
 	data, _ := json.Marshal(msg)
 	err := c.Conn.Write(context.Background(), websocket.MessageText, []byte(data))
 	return err

@@ -6,16 +6,17 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/anhtr13/synth-socket/api/pkgs/cache"
-	"github.com/anhtr13/synth-socket/api/pkgs/queue"
 	"github.com/coder/websocket"
 	"github.com/google/uuid"
+	amqp "github.com/rabbitmq/amqp091-go"
 
+	"github.com/anhtr13/synth-socket/socket/internal/cache"
 	"github.com/anhtr13/synth-socket/socket/internal/conf"
+	"github.com/anhtr13/synth-socket/socket/internal/queue"
 	"github.com/anhtr13/synth-socket/socket/internal/util"
 )
 
-func (s *SocketServer) HandleSocketConnection(w http.ResponseWriter, r *http.Request) {
+func (s *SocketServer) HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 	user_id, err := s.getUserId(r)
 	if err != nil {
 		util.WriteError(w, 400, err.Error())
@@ -55,45 +56,41 @@ func (s *SocketServer) HandleSocketConnection(w http.ResponseWriter, r *http.Req
 			continue
 		}
 
-		msg := SMessage{}
+		msg := Message{}
 		err = json.Unmarshal(data, &msg)
 		if err != nil {
-			user.Broadcast(SPayload{
-				Event: EVENT_ERROR,
-				Data: SError{
-					Error: err.Error(),
-				},
-			})
 			continue
 		}
 
 		room_uuid, err := uuid.Parse(msg.ReceiverId)
 		if err != nil {
-			user.Broadcast(SPayload{
-				Event: EVENT_ERROR,
-				Data: SError{
-					Error: err.Error(),
-				},
-			})
 			continue
 		}
 
 		room := s.RoomPool.GetRoom(room_uuid)
-		if room == nil || room.GetMember(user_id) == nil {
-			user.Broadcast(SPayload{
-				Event: EVENT_ERROR,
-				Data: SError{
-					Error: "Room not found",
-				},
-			})
+		if room == nil {
+			continue
+		}
+		if room.GetMember(user_id) == nil {
 			continue
 		}
 
 		msg.SenderId = user.UserId.String()
-		room.Broadcast(SPayload{
+		room.Broadcast(BroadcastPayload{
 			Event: EVENT_MESSAGE,
 			Data:  msg,
 		})
+
+		err = conf.RBMQ_Channel.Publish(
+			queue.EXCHANGE_SOCKET_TO_CRON, // exchange
+			queue.ROUTE_SAVE_MESSAGE,      // routing key
+			false,                         // mandatory
+			false,                         // immediate
+			amqp.Publishing{
+				ContentType: "text/plain",
+				Body:        data,
+			},
+		)
 	}
 }
 
@@ -148,16 +145,24 @@ func (s *SocketServer) HandleQueue_RoomIo(done chan bool) {
 			switch room_io_msg.Type {
 			case queue.ROOM_IN:
 				room.AddMember(user)
-				room_in_msg := SPayload{
-					Event: EVENT_ROOM_IO,
-					Data:  room_io_msg,
+				room_in_msg := BroadcastPayload{
+					Event: EVENT_MESSAGE,
+					Data: Message{
+						SenderId:   "server",
+						ReceiverId: room_io_msg.RoomId,
+						Text:       "someone has joined the room",
+					},
 				}
 				room.Broadcast(room_in_msg)
 			case queue.ROOM_OUT:
 				room.RemoveMember(user)
-				room_out_msg := SPayload{
-					Event: EVENT_ROOM_IO,
-					Data:  room_io_msg,
+				room_out_msg := BroadcastPayload{
+					Event: EVENT_MESSAGE,
+					Data: Message{
+						SenderId:   "server",
+						ReceiverId: room_io_msg.RoomId,
+						Text:       "someone has left the room",
+					},
 				}
 				room.Broadcast(room_out_msg)
 			}
@@ -198,7 +203,7 @@ func (s *SocketServer) HandleQueue_Notification(done chan bool) {
 				continue
 			}
 
-			noti_msg := SPayload{
+			noti_msg := BroadcastPayload{
 				Event: EVENT_NOTIFICATION,
 				Data:  notification_msg,
 			}
