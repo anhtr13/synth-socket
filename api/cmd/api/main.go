@@ -15,10 +15,7 @@ func init() {
 }
 
 func main() {
-	err := loadDataToCache()
-	if err != nil {
-		log.Fatal("Cannot load data to cache:", err)
-	}
+	loadDataToCache()
 
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%d", conf.PORT),
@@ -32,7 +29,7 @@ func main() {
 	go gracefulShutdown(server, forever)
 
 	log.Println("Server is running on port", server.Addr)
-	err = server.ListenAndServe()
+	err := server.ListenAndServe()
 	if err != nil && err != http.ErrServerClosed {
 		panic(fmt.Sprintf("Http server error: %s", err))
 	}
