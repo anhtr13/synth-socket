@@ -1,4 +1,4 @@
-export type SEvent = "message" | "notification";
+export type SEvent = "message" | "notification" | "room_io";
 
 export type SMessage = {
 	sender_id: string;
@@ -17,7 +17,13 @@ export type SNotification = {
 	created_at: string;
 };
 
+export type SRoomIO = {
+	user_id: string;
+	room_id: string;
+	type: "room_in" | "room_out";
+};
+
 export type SPayload = {
 	event: SEvent;
-	data: any; // Message | Notification
+	data: any; // Message | Notification | RoomIO
 };

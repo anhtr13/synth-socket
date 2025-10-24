@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, nextTick, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { usePersonalStore } from "@/stores/personal";
 import { useWebSocketStore } from "@/stores/websocket";
@@ -20,6 +20,7 @@ const room_id = computed<any>(() => route.params.room_id);
 roomDataStore.current_id = room_id.value;
 
 const typingMessage = ref("");
+const bottomElement = ref<HTMLDivElement | null>(null);
 
 onMounted(() => {
 	_get(`/api/v1/room/all/${room_id.value}/member`)
@@ -39,6 +40,17 @@ onMounted(() => {
 			console.error(err);
 		});
 });
+
+watch(
+	() => roomDataStore.messages,
+	async () => {
+		await nextTick();
+		if (bottomElement.value) {
+			bottomElement.value.scrollIntoView({ behavior: "smooth" });
+		}
+	},
+	{ deep: true },
+);
 
 watch(
 	() => room_id.value,
@@ -74,13 +86,16 @@ function submitMessage() {
 	typingMessage.value = "";
 }
 </script>
+
 <template>
 	<div class="flex h-[calc(100vh-3.5rem)] grow flex-col p-3 sm:h-screen">
 		<div class="thin-scrollbar flex w-full grow flex-col overflow-auto">
 			<RoomMessage
 				v-for="msg in roomDataStore.messages"
 				:sender="roomDataStore.members.get(msg.sender_id)"
-				:message="msg" />
+				:message="msg"
+				:is_server_msg="msg.sender_id === 'server'" />
+			<div ref="bottomElement"></div>
 		</div>
 		<div class="w-full shrink-0 p-2">
 			<form

@@ -125,13 +125,13 @@ func (s *SocketServer) HandleQueue_RoomIo(done chan bool) {
 		case <-done:
 			return
 		case d := <-delivery:
-			room_io_msg := queue.RoomIo{}
-			err = json.Unmarshal(d.Body, &room_io_msg)
+			q_msg := queue.RoomIo{}
+			err = json.Unmarshal(d.Body, &q_msg)
 			if err != nil {
 				continue
 			}
 
-			user_uuid, err := uuid.Parse(room_io_msg.UserId)
+			user_uuid, err := uuid.Parse(q_msg.UserId)
 			if err != nil {
 				continue
 			}
@@ -140,13 +140,13 @@ func (s *SocketServer) HandleQueue_RoomIo(done chan bool) {
 				continue
 			}
 
-			room_uuid, err := uuid.Parse(room_io_msg.RoomId)
+			room_uuid, err := uuid.Parse(q_msg.RoomId)
 			if err != nil {
 				continue
 			}
 			room := s.RoomPool.GetRoom(room_uuid)
 			if room == nil {
-				switch room_io_msg.Type {
+				switch q_msg.Type {
 				case queue.ROOM_IN:
 					room = NewRoom(room_uuid)
 					s.RoomPool.AddRoom(room)
@@ -155,29 +155,29 @@ func (s *SocketServer) HandleQueue_RoomIo(done chan bool) {
 				}
 			}
 
-			switch room_io_msg.Type {
+			switch q_msg.Type {
 			case queue.ROOM_IN:
 				room.AddMember(user)
-				room_in_msg := BroadcastPayload{
-					Event: EVENT_MESSAGE,
-					Data: Message{
-						SenderId:   "server",
-						ReceiverId: room_io_msg.RoomId,
-						Text:       "someone has joined the room",
+				room_in := BroadcastPayload{
+					Event: EVENT_ROOM_IO,
+					Data: RoomIO{
+						UserId: q_msg.UserId,
+						RoomId: q_msg.RoomId,
+						Type:   ROOM_IN,
 					},
 				}
-				room.Broadcast(room_in_msg)
+				room.Broadcast(room_in)
 			case queue.ROOM_OUT:
 				room.RemoveMember(user)
-				room_out_msg := BroadcastPayload{
-					Event: EVENT_MESSAGE,
-					Data: Message{
-						SenderId:   "server",
-						ReceiverId: room_io_msg.RoomId,
-						Text:       "someone has left the room",
+				room_out := BroadcastPayload{
+					Event: EVENT_ROOM_IO,
+					Data: RoomIO{
+						UserId: q_msg.UserId,
+						RoomId: q_msg.RoomId,
+						Type:   ROOM_OUT,
 					},
 				}
-				room.Broadcast(room_out_msg)
+				room.Broadcast(room_out)
 			}
 		}
 	}

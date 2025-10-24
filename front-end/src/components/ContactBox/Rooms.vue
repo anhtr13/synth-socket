@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, watch } from "vue";
+import { ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useRecentUpdatedStore } from "@/stores/recent_updated";
 import { useGlobalStateStore } from "@/stores/global_state";
@@ -32,14 +32,16 @@ const searchFriends = ref<UserInfo[]>([]);
 const newRoomName = ref("");
 const inviteChosenRoom = ref<Room | null>(null);
 
-onMounted(() => {
-	_get("/api/v1/room/owned")
-		.then((data) => {
-			ownedRooms.value = data;
-		})
-		.catch((err) => {
-			console.error(err);
-		});
+watch(mode, (value) => {
+	if (value !== "default") {
+		_get("/api/v1/room/owned")
+			.then((data) => {
+				ownedRooms.value = data;
+			})
+			.catch((err) => {
+				console.error(err);
+			});
+	}
 });
 
 let timerId: any;
@@ -105,9 +107,6 @@ function handleCreateRoom() {
 	})
 		.then((data) => {
 			console.log(data);
-			recentUpdatedStore.roomSet.set(data.room_id, data);
-			allRooms.value = [data, ...allRooms.value];
-			ownedRooms.value = [data, ...ownedRooms.value];
 			toast.success("Success!");
 			newRoomName.value = "";
 			mode.value = "default";
@@ -196,21 +195,20 @@ function handleClickRoom(room_id: string) {
 					class="flex w-full cursor-pointer items-center px-3 py-2 hover:bg-violet-500/30">
 					<IconGroup
 						v-if="!room[1].room_picture"
-						class="mr-3 size-8 shrink-0 border border-neutral-400 p-1" />
+						class="mr-2 size-7 shrink-0 border border-neutral-400 p-1" />
 					<img
 						v-if="room[1].room_picture"
 						:src="room[1].room_picture"
-						class="mr-3 size-8 object-cover" />
-					<div class="flex w-[calc(100%-2rem)] grow flex-col">
-						<span class="w-full truncate text-start font-bold">
+						class="mr-2 size-7 object-cover" />
+					<div class="flex w-[calc(100%-2rem)] grow items-center gap-1 truncate">
+						<div
+							v-if="!room[1].seen_last_message"
+							class="size-1 bg-green-500"></div>
+						<span
+							class="w-full truncate text-start text-sm"
+							:class="room[1].seen_last_message ? 'font-semibold' : 'font-bold'">
 							{{ room[1].room_name }}
 						</span>
-						<div
-							v-if="room[1].seen_last_message === false"
-							class="flex items-center gap-1">
-							<div class="size-1 bg-white"></div>
-							<span class="w-full truncate text-start text-xs"> New message. </span>
-						</div>
 					</div>
 				</button>
 			</div>
@@ -303,11 +301,11 @@ function handleClickRoom(room_id: string) {
 			<div class="my-1 flex w-full items-center bg-violet-500/30 px-3 py-2">
 				<IconGroup
 					v-if="!inviteChosenRoom.room_picture"
-					class="mr-3 size-8" />
+					class="mr-3 size-7" />
 				<img
 					v-if="inviteChosenRoom?.room_picture"
 					:src="inviteChosenRoom.room_picture"
-					class="mr-3 size-8 object-cover" />
+					class="mr-3 size-7 object-cover" />
 				<span class="w-[calc(100%-2rem)] truncate text-sm">
 					{{ inviteChosenRoom.room_name }}
 				</span>
@@ -337,10 +335,10 @@ function handleClickRoom(room_id: string) {
 						<img
 							v-if="friend[1].profile_image"
 							:src="friend[1].profile_image"
-							class="size-8 object-cover" />
+							class="size-7 object-cover" />
 						<IconUserAstronaut
 							v-else
-							class="size-8 object-cover" />
+							class="size-7 object-cover" />
 						<h3 class="ml-2 max-w-[calc(100%-1.5rem)] truncate font-medium">
 							{{ friend[1].user_name }}
 						</h3>
