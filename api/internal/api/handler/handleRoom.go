@@ -64,7 +64,7 @@ func HandleCreateRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	room_in_msg, _ := json.Marshal(
-		queue.RoomIo{
+		queue.RoomIO{
 			UserId: user_id,
 			RoomId: room.RoomID.String(),
 			Type:   queue.ROOM_IN,
@@ -282,7 +282,7 @@ func HandleLeaveRoom(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	room_out_msg, _ := json.Marshal(
-		queue.RoomIo{
+		queue.RoomIO{
 			UserId: user_id,
 			RoomId: room_id,
 			Type:   queue.ROOM_OUT,
@@ -374,7 +374,7 @@ func HandleAcceptRoomInvite(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	room_in_msg, _ := json.Marshal(
-		queue.RoomIo{
+		queue.RoomIO{
 			UserId: user_id,
 			RoomId: req.RoomID.String(),
 			Type:   queue.ROOM_IN,

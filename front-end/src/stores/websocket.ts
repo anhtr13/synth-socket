@@ -4,7 +4,7 @@ import { useRecentUpdatedStore } from "./recent_updated";
 import { useNotificationStore } from "./notifications";
 import { useRoomDataStore } from "./room_data";
 import { usePersonalStore } from "./personal";
-import type { SMessage, SPayload, SRoomIO } from "@/types/socket";
+import type { SFriendIO, SMessage, SPayload, SRoomIO } from "@/types/socket";
 import type { UserInfo } from "@/types/user";
 import { _get } from "@/utils/fetch";
 import type { Room } from "@/types/room";
@@ -53,9 +53,9 @@ export const useWebSocketStore = defineStore("websocketStore", () => {
 					notificationStore.notifications.push(noti);
 					break;
 				case "room_io":
-					const { room_id, user_id, type }: SRoomIO = payload.data;
+					const { room_id, user_id, type: r_io_type }: SRoomIO = payload.data;
 					if (user_id === personalStore.info?.user_id) {
-						switch (type) {
+						switch (r_io_type) {
 							case "room_in":
 								const room: Room = await _get(`/api/v1/room/all/${room_id}`).catch((err) =>
 									console.error(err),
@@ -70,7 +70,7 @@ export const useWebSocketStore = defineStore("websocketStore", () => {
 						return;
 					}
 					if (room_id === roomDataStore.current_id) {
-						switch (type) {
+						switch (r_io_type) {
 							case "room_in":
 								const user: UserInfo = await _get(`/api/v1/user/${user_id}`).catch((err) =>
 									console.error(err),
@@ -97,6 +97,22 @@ export const useWebSocketStore = defineStore("websocketStore", () => {
 						}
 					}
 					recentUpdatedStore.updateRoomNewMessage(room_id);
+					break;
+				case "friend_io":
+					const { user1_id, user2_id, type: f_io_type }: SFriendIO = payload.data;
+					let friend_id = user1_id;
+					if (user1_id === personalStore.info?.user_id) {
+						friend_id = user2_id;
+					}
+					if (f_io_type === "friend_in") {
+						const user: UserInfo = await _get(`/api/v1/user/${friend_id}`).catch((err) =>
+							console.error(err),
+						);
+						recentUpdatedStore.friendSet.set(user.user_id, user);
+					}
+					if (f_io_type === "friend_out") {
+						recentUpdatedStore.friendSet.delete(friend_id);
+					}
 					break;
 				default:
 			}

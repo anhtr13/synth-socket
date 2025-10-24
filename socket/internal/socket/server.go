@@ -107,7 +107,7 @@ func (s *SocketServer) HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *SocketServer) HandleQueue_RoomIo(done chan bool) {
+func (s *SocketServer) HandleQueue_RoomIO(done chan bool) {
 	delivery, err := conf.RBMQ_Channel.Consume(
 		conf.Queue_RoomIO.Name, // queue
 		"",                     // consumer
@@ -125,7 +125,7 @@ func (s *SocketServer) HandleQueue_RoomIo(done chan bool) {
 		case <-done:
 			return
 		case d := <-delivery:
-			q_msg := queue.RoomIo{}
+			q_msg := queue.RoomIO{}
 			err = json.Unmarshal(d.Body, &q_msg)
 			if err != nil {
 				continue
@@ -183,6 +183,54 @@ func (s *SocketServer) HandleQueue_RoomIo(done chan bool) {
 	}
 }
 
+func (s *SocketServer) HandleQueue_FriendIO(done chan bool) {
+	delivery, err := conf.RBMQ_Channel.Consume(
+		conf.Queue_FriendIO.Name, // queue
+		"",                       // consumer
+		true,                     // auto-ack
+		false,                    // exclusive
+		false,                    // no-local
+		false,                    // no-wait
+		nil,                      // args
+	)
+	if err != nil {
+		panic(err)
+	}
+	for {
+		select {
+		case <-done:
+			return
+		case d := <-delivery:
+			q_msg := queue.FriendIO{}
+			err = json.Unmarshal(d.Body, &q_msg)
+			if err != nil {
+				continue
+			}
+			user1_uuid, err := uuid.Parse(q_msg.User1Id)
+			user2_uuid, err := uuid.Parse(q_msg.User2Id)
+			if err != nil {
+				continue
+			}
+			msg := BroadcastPayload{
+				Event: EVENT_FIREND_IO,
+				Data: FriendIO{
+					User1Id: q_msg.User1Id,
+					User2Id: q_msg.User2Id,
+					Type:    FriendIoType(q_msg.Type),
+				},
+			}
+			user1 := s.UserPool.GetUser(user1_uuid)
+			user2 := s.UserPool.GetUser(user2_uuid)
+			if user1 != nil {
+				user1.Broadcast(msg)
+			}
+			if user2 != nil {
+				user2.Broadcast(msg)
+			}
+		}
+	}
+}
+
 func (s *SocketServer) HandleQueue_Notification(done chan bool) {
 	delivery, err := conf.RBMQ_Channel.Consume(
 		conf.Queue_Notification.Name, // queue
@@ -201,12 +249,12 @@ func (s *SocketServer) HandleQueue_Notification(done chan bool) {
 		case <-done:
 			return
 		case d := <-delivery:
-			notification_msg := queue.Notification{}
-			err = json.Unmarshal(d.Body, &notification_msg)
+			q_msg := queue.Notification{}
+			err = json.Unmarshal(d.Body, &q_msg)
 			if err != nil {
 				continue
 			}
-			user_uuid, err := uuid.Parse(notification_msg.UserId)
+			user_uuid, err := uuid.Parse(q_msg.UserId)
 			if err != nil {
 				continue
 			}
@@ -218,7 +266,7 @@ func (s *SocketServer) HandleQueue_Notification(done chan bool) {
 
 			noti_msg := BroadcastPayload{
 				Event: EVENT_NOTIFICATION,
-				Data:  notification_msg,
+				Data:  q_msg,
 			}
 
 			user.Broadcast(noti_msg)

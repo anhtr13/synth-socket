@@ -4,7 +4,6 @@ import { useRouter } from "vue-router";
 import { usePersonalStore } from "@/stores/personal";
 import { useGlobalStateStore, type FocusingHeader } from "@/stores/global_state";
 import { useNotificationStore } from "@/stores/notifications";
-import { useRecentUpdatedStore } from "@/stores/recent_updated";
 import { _delete, _get, _patch, _post } from "@/utils/fetch";
 import { toast } from "vue3-toastify";
 import type { SNotification } from "@/types/socket";
@@ -15,14 +14,11 @@ import IconEdit from "./icons/IconEdit.vue";
 import IconLogout from "./icons/IconLogout.vue";
 import IconBell from "./icons/IconBell.vue";
 import IconClose from "./icons/IconClose.vue";
-import type { FriendshipInfo, UserInfo } from "@/types/user";
-import type { Room } from "@/types/room";
 
 const router = useRouter();
 const personalStore = usePersonalStore();
 const globalStateStore = useGlobalStateStore();
 const notificationStore = useNotificationStore();
-const recentUpdatedStore = useRecentUpdatedStore();
 
 const showSettingDropdown = ref(false);
 const showNotificationDropdown = ref(false);
@@ -75,11 +71,7 @@ function handleLogout() {
 async function handleFriendRequest(action: "accept" | "reject", noti: SNotification) {
 	try {
 		if (action === "accept") {
-			const friendship: FriendshipInfo = await _post(`/api/v1/friend_request/${noti.id_ref}`);
-			const user: UserInfo = await _get(
-				`/api/v1/user/${personalStore.info!.user_id === friendship.user1_id ? friendship.user2_id : friendship.user1_id}`,
-			);
-			recentUpdatedStore.friendSet.set(user.user_id, user);
+			await _post(`/api/v1/friend_request/${noti.id_ref}`);
 			toast.success("Success!");
 		} else {
 			await _delete(`/api/v1/friend_request/${noti.id_ref}`);
@@ -97,9 +89,7 @@ async function handleFriendRequest(action: "accept" | "reject", noti: SNotificat
 async function handleRoomInvite(action: "accept" | "reject", noti: SNotification) {
 	try {
 		if (action === "accept") {
-			const room_member = await _post(`/api/v1/room_invite/${noti.id_ref}`);
-			const room: Room = await _get(`/api/v1/room/all/${room_member.room_id}`);
-			recentUpdatedStore.roomSet.set(room.room_id, room);
+			await _post(`/api/v1/room_invite/${noti.id_ref}`);
 			toast.success("Success!");
 		} else {
 			await _delete(`/api/v1/friend_request/${noti.id_ref}`);

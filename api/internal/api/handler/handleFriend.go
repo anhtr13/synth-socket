@@ -1,16 +1,19 @@
 package handler
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strconv"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
+	amqp "github.com/rabbitmq/amqp091-go"
 
 	"github.com/anhtr13/synth-socket/api/internal/cache"
 	"github.com/anhtr13/synth-socket/api/internal/conf"
 	"github.com/anhtr13/synth-socket/api/internal/database"
+	"github.com/anhtr13/synth-socket/api/internal/queue"
 	"github.com/anhtr13/synth-socket/api/internal/util"
 )
 
@@ -128,6 +131,26 @@ func HandleAcceptFriendRequest(w http.ResponseWriter, r *http.Request) {
 	).Err()
 	if err != nil {
 		util.WriteError(w, 500, "Cannot update cache", err.Error())
+		return
+	}
+	friend_io_msg, _ := json.Marshal(
+		queue.FriendIO{
+			User1Id: friendship.User1ID.String(),
+			User2Id: friendship.User2ID.String(),
+			Type:    queue.FRIEND_IN,
+		},
+	)
+	err = conf.RBMQ_Channel.Publish(
+		queue.EXCHANGE_API_TO_SOCKET,
+		queue.ROUTE_FRIEND_IO,
+		false,
+		false,
+		amqp.Publishing{
+			Body: friend_io_msg,
+		},
+	)
+	if err != nil {
+		util.WriteError(w, 500, "Cannot publish message to queue", err.Error())
 		return
 	}
 	util.WriteJson(w, 200, friendship)

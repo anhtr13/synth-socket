@@ -48,11 +48,12 @@ func main() {
 		WriteTimeout: 30 * time.Second,
 	}
 
-	forever := make(chan bool, 1)
+	done := make(chan bool, 1)
 
-	go gracefulShutdown(httpServer, forever)
-	go socketServer.HandleQueue_RoomIo(forever)
-	go socketServer.HandleQueue_Notification(forever)
+	go gracefulShutdown(httpServer, done)
+	go socketServer.HandleQueue_RoomIO(done)
+	go socketServer.HandleQueue_FriendIO(done)
+	go socketServer.HandleQueue_Notification(done)
 
 	log.Println("Server is running on port", httpServer.Addr)
 	err := httpServer.ListenAndServe()
@@ -60,7 +61,7 @@ func main() {
 		panic(fmt.Sprintf("Http server error: %s", err))
 	}
 
-	<-forever
+	<-done
 
 	conf.CloseAllConnections()
 	log.Println("Graceful shutdown complete.")

@@ -1,24 +1,33 @@
 package queue
 
-type RoomIoType string
+type (
+	RoomIoType       string
+	FriendIoType     string
+	NotificationType string
+)
 
 const (
 	ROOM_IN  RoomIoType = "room_in"
 	ROOM_OUT RoomIoType = "room_out"
+
+	FRIEND_IN  FriendIoType = "friend_in"
+	FRIEND_OUT FriendIoType = "friend_out"
+
+	REQ_FRIEND  NotificationType = "friend_request"
+	ROOM_INVITE NotificationType = "room_invite"
 )
 
-type RoomIo struct {
+type RoomIO struct {
 	UserId string     `json:"user_id"`
 	RoomId string     `json:"room_id"`
 	Type   RoomIoType `json:"type"`
 }
 
-type NotificationType string
-
-const (
-	REQ_FRIEND  NotificationType = "friend_request"
-	ROOM_INVITE NotificationType = "room_invite"
-)
+type FriendIO struct {
+	User1Id string       `json:"user1_id"`
+	User2Id string       `json:"user2_id"`
+	Type    FriendIoType `json:"type"`
+}
 
 type Notification struct {
 	NotificationId string           `json:"notification_id"`

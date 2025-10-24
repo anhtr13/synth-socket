@@ -5,9 +5,10 @@ import (
 	"log"
 	"time"
 
-	"github.com/anhtr13/synth-socket/socket/internal/queue"
 	amqp "github.com/rabbitmq/amqp091-go"
 	redis "github.com/redis/go-redis/v9"
+
+	"github.com/anhtr13/synth-socket/socket/internal/queue"
 )
 
 var (
@@ -15,6 +16,7 @@ var (
 	RBMQ_Channel    *amqp.Channel
 
 	Queue_RoomIO       amqp.Queue
+	Queue_FriendIO     amqp.Queue
 	Queue_Notification amqp.Queue
 
 	RD_Client *redis.Client
@@ -88,6 +90,19 @@ func InitConnection() {
 	}
 	Queue_RoomIO = q_room_io
 
+	q_friend_io, err := ch.QueueDeclare(
+		"",
+		false,
+		false,
+		true,
+		false,
+		nil,
+	)
+	if err != nil {
+		log.Fatal("Error when declare queue: ", err)
+	}
+	Queue_FriendIO = q_friend_io
+
 	q_notification, err := ch.QueueDeclare(
 		"",
 		false,
@@ -105,6 +120,16 @@ func InitConnection() {
 	err = ch.QueueBind(
 		Queue_RoomIO.Name,
 		queue.ROUTE_ROOM_IO,
+		queue.EXCHANGE_API_TO_SOCKET,
+		false,
+		nil,
+	)
+	if err != nil {
+		log.Fatal("Error when bind queue: ", err)
+	}
+	err = ch.QueueBind(
+		Queue_FriendIO.Name,
+		queue.ROUTE_FRIEND_IO,
 		queue.EXCHANGE_API_TO_SOCKET,
 		false,
 		nil,
