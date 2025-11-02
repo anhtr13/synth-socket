@@ -2,16 +2,17 @@ package socket
 
 type (
 	Event            string
-	NotificationType string
 	RoomIoType       string
 	FriendIoType     string
+	NotificationType string
 )
 
 const (
-	EVENT_MESSAGE      Event = "message"
-	EVENT_NOTIFICATION Event = "notification"
-	EVENT_ROOM_IO      Event = "room_io"
-	EVENT_FIREND_IO    Event = "friend_io"
+	EVENT_MESSAGE       Event = "message"
+	EVENT_ROOM_IO       Event = "room_io"
+	EVENT_FIREND_IO     Event = "friend_io"
+	EVENT_NOTIFICATION  Event = "notification"
+	EVENT_ONLINE_STATUS Event = "online_status"
 
 	REQ_FRIEND  NotificationType = "friend_request"
 	ROOM_INVITE NotificationType = "room_invite"
@@ -30,16 +31,6 @@ type Message struct {
 	MediaUrl   string `json:"media_url"`
 }
 
-type Notification struct {
-	NotificationId string           `json:"notification_id"`
-	UserId         string           `json:"user_id"`
-	Message        string           `json:"message"`
-	Type           NotificationType `json:"type"`
-	IdRef          string           `json:"id_ref"`
-	Seen           bool             `json:"seen"`
-	CreatedAt      string           `json:"created_at"`
-}
-
 type RoomIO struct {
 	UserId string     `json:"user_id"`
 	RoomId string     `json:"room_id"`
@@ -52,7 +43,19 @@ type FriendIO struct {
 	Type    FriendIoType `json:"type"`
 }
 
+type Notification struct {
+	NotificationId string           `json:"notification_id"`
+	UserId         string           `json:"user_id"`
+	Message        string           `json:"message"`
+	Type           NotificationType `json:"type"`
+	IdRef          string           `json:"id_ref"`
+	Seen           bool             `json:"seen"`
+	CreatedAt      string           `json:"created_at"`
+}
+
+type OnlineStatus map[string]string
+
 type BroadcastPayload struct {
 	Event Event `json:"event"`
-	Data  any   `json:"data"` // Message | Notification | RoomIO
+	Data  any   `json:"data"` // Message | Notification | RoomIO | OnlineStatus
 }

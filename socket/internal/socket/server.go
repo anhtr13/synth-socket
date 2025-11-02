@@ -52,8 +52,18 @@ func (s *SocketServer) HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 	}
 	if user.CountClients() == 1 {
 		s.updateUserActiveStatus(user, cache.USER_STATUS_ONLINE)
+		s.noticeOnlineStatusToFriends(user, cache.USER_STATUS_ONLINE)
 	}
 
+	friend_onl_status, err := s.getFriendOnlineStatus(user)
+	if err == nil {
+		client.WriteMsg(
+			BroadcastPayload{
+				Event: EVENT_ONLINE_STATUS,
+				Data:  friend_onl_status,
+			},
+		)
+	}
 	ctx := context.Background()
 
 	// Handle websocket messages
@@ -62,6 +72,7 @@ func (s *SocketServer) HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 
 		if err != nil {
 			// Read failed => client disconnected
+			s.noticeOnlineStatusToFriends(user, time.Now().Format(time.RFC3339Nano))
 			s.cleanUpClient(client, user)
 			return
 		}
@@ -372,13 +383,12 @@ func (s *SocketServer) cleanUpClient(client *Client, user *User) {
 		conf.RD_Client.Set(
 			ctx,
 			fmt.Sprintf("%s:%s:%s", cache.KEY_USER, user.UserId.String(), cache.USER_STATUS),
-			time.Now().String(),
+			time.Now().Format(time.RFC3339Nano),
 			0,
 		).Err()
 	}
 }
 
-// Update user active status
 func (s *SocketServer) updateUserActiveStatus(user *User, active_status string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
@@ -391,6 +401,72 @@ func (s *SocketServer) updateUserActiveStatus(user *User, active_status string) 
 	).Err()
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func (s *SocketServer) getFriendOnlineStatus(user *User) (OnlineStatus, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
+	defer cancel()
+
+	friend_ids, err := conf.RD_Client.SMembers(
+		ctx,
+		fmt.Sprintf("%s:%s:%s", cache.KEY_USER, user.UserId.String(), cache.USER_FRIENDS),
+	).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	keys := []string{}
+	for _, id := range friend_ids {
+		keys = append(keys, fmt.Sprintf("%s:%s:%s", cache.KEY_USER, id, cache.USER_STATUS))
+	}
+
+	friend_onl_status, err := conf.RD_Client.MGet(ctx, keys...).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	result := map[string]string{}
+	for i, f_id := range friend_ids {
+		if friend_onl_status[i] == nil {
+			result[f_id] = ""
+		} else {
+			onl_stt := friend_onl_status[i].(string)
+			result[f_id] = onl_stt
+		}
+	}
+	return result, nil
+}
+
+func (s *SocketServer) noticeOnlineStatusToFriends(user *User, status string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
+	defer cancel()
+
+	friend_ids, err := conf.RD_Client.SMembers(
+		ctx,
+		fmt.Sprintf("%s:%s:%s", cache.KEY_USER, user.UserId.String(), cache.USER_FRIENDS),
+	).Result()
+	if err != nil {
+		return err
+	}
+
+	msg := BroadcastPayload{
+		Event: EVENT_ONLINE_STATUS,
+		Data: map[string]string{
+			user.UserId.String(): status,
+		},
+	}
+
+	for _, f_id := range friend_ids {
+		f_uuid, err := uuid.Parse(f_id)
+		if err != nil {
+			continue
+		}
+		fr := s.UserPool.GetUser(f_uuid)
+		if fr != nil {
+			fr.Broadcast(msg)
+		}
 	}
 	return nil
 }

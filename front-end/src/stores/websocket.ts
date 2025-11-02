@@ -4,10 +4,10 @@ import { useRecentUpdatedStore } from "./recent_updated";
 import { useNotificationStore } from "./notifications";
 import { useRoomDataStore } from "./room_data";
 import { usePersonalStore } from "./personal";
-import type { SFriendIO, SMessage, SPayload, SRoomIO } from "@/types/socket";
+import type { SFriendIO, SMessage, SOnlineStatus, SPayload, SRoomIO } from "@/types/socket";
 import type { UserInfo } from "@/types/user";
-import { _get } from "@/utils/fetch";
 import type { Room } from "@/types/room";
+import { _get } from "@/utils/fetch";
 
 export const useWebSocketStore = defineStore("websocketStore", () => {
 	const ws = ref<WebSocket | null>(null);
@@ -113,6 +113,11 @@ export const useWebSocketStore = defineStore("websocketStore", () => {
 					if (f_io_type === "friend_out") {
 						recentUpdatedStore.friendSet.delete(friend_id);
 					}
+					break;
+				case "online_status":
+					const onl_status: SOnlineStatus = payload.data;
+					console.log(onl_status);
+					recentUpdatedStore.updateFriendOnlineStatus(onl_status);
 					break;
 				default:
 			}

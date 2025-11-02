@@ -2,6 +2,7 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 import type { Room } from "@/types/room";
 import type { UserInfo } from "@/types/user";
+import type { SOnlineStatus } from "@/types/socket";
 
 export const useRecentUpdatedStore = defineStore("recentUpdatedStore", () => {
 	// least recent -> most recent
@@ -40,6 +41,15 @@ export const useRecentUpdatedStore = defineStore("recentUpdatedStore", () => {
 		friendSet.value = newSet;
 	};
 
+	const updateFriendOnlineStatus = (status: SOnlineStatus) => {
+		for (let fr_id in status) {
+			let friend = friendSet.value.get(fr_id);
+			if (friend) {
+				friend.online_status = status[fr_id];
+			}
+		}
+	};
+
 	return {
 		roomSet,
 		friendSet,
@@ -47,5 +57,6 @@ export const useRecentUpdatedStore = defineStore("recentUpdatedStore", () => {
 		updateRoomSeenMessage,
 		updateRoomNewMessage,
 		updateFriendSet,
+    updateFriendOnlineStatus
 	};
 });

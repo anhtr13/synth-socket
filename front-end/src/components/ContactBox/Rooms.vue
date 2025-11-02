@@ -331,17 +331,34 @@ function handleClickRoom(room_id: string) {
 				<div
 					v-for="friend in recentUpdatedStore.friendSet"
 					class="flex items-center justify-between py-2 pl-3">
-					<div class="flex max-w-[calc(100%-2rem)] items-center">
-						<img
-							v-if="friend[1].profile_image"
-							:src="friend[1].profile_image"
-							class="size-7 object-cover" />
-						<IconUserAstronaut
-							v-else
-							class="size-7 object-cover" />
-						<h3 class="ml-2 max-w-[calc(100%-1.5rem)] truncate font-medium">
-							{{ friend[1].user_name }}
-						</h3>
+					<div class="flex w-full max-w-[calc(100%-2rem)] items-center">
+						<div class="relative shrink-0">
+							<img
+								v-if="friend[1].profile_image"
+								:src="friend[1].profile_image"
+								class="size-8 object-cover" />
+							<IconUserAstronaut
+								v-else
+								class="size-8 object-cover" />
+							<div
+								v-show="friend[1].online_status === 'online'"
+								class="absolute right-0 bottom-0 size-2 bg-green-500"></div>
+						</div>
+						<div class="ml-2 flex w-full flex-col">
+							<h3 class="max-w-[calc(100%-1.5rem)] truncate font-medium">
+								{{ friend[1].user_name }}
+							</h3>
+							<span
+								v-if="friend[1].online_status === 'online'"
+								class="text-xs text-neutral-400">
+								online now
+							</span>
+							<span
+								v-else-if="friend[1].online_status"
+								class="text-xs text-neutral-400">
+								{{ new Date(friend[1].online_status).toLocaleString() }}
+							</span>
+						</div>
 					</div>
 					<button
 						@click="() => createRoomInvite(friend[1].user_id)"
@@ -366,10 +383,10 @@ function handleClickRoom(room_id: string) {
 						<img
 							v-if="friend.profile_image"
 							:src="friend.profile_image"
-							class="size-6 object-cover" />
+							class="size-8 object-cover" />
 						<IconUserAstronaut
 							v-else
-							class="size-6 object-cover" />
+							class="size-8 object-cover" />
 						<h3 class="ml-2 max-w-[calc(100%-1.5rem)] truncate font-medium">
 							{{ friend.user_name }}
 						</h3>
@@ -382,7 +399,7 @@ function handleClickRoom(room_id: string) {
 					</button>
 				</div>
 				<span
-					v-show="recentUpdatedStore.friendSet.size === 0"
+					v-show="searchFriends.length === 0"
 					class="text-sm text-neutral-400">
 					No friends found.
 				</span>

@@ -1,4 +1,4 @@
-export type SEvent = "message" | "notification" | "room_io" | "friend_io";
+export type SEvent = "message" | "notification" | "room_io" | "friend_io" | "online_status";
 
 export type SMessage = {
 	sender_id: string;
@@ -29,7 +29,11 @@ export type SFriendIO = {
 	type: "friend_in" | "friend_out";
 };
 
+export type SOnlineStatus = {
+	[user_id: string]: string;
+};
+
 export type SPayload = {
 	event: SEvent;
-	data: any; // Message | Notification | RoomIO
+	data: any; // Message | Notification | RoomIO | FriendIO | OnlineStatus
 };

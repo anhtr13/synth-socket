@@ -67,8 +67,8 @@ func loadDataToCache() error {
 		if user_friends[user2_id] == nil {
 			user_friends[user2_id] = []string{}
 		}
-		user_friends[user1_id] = append(user_friends[user1_id], user1_id)
-		user_friends[user2_id] = append(user_friends[user2_id], user2_id)
+		user_friends[user1_id] = append(user_friends[user1_id], user2_id)
+		user_friends[user2_id] = append(user_friends[user2_id], user1_id)
 	}
 	for user_id, friendships := range user_friends {
 		conf.RD_Client.SAdd(

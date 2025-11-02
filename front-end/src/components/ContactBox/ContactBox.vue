@@ -1,32 +1,11 @@
 <script setup lang="ts">
 import { useGlobalStateStore } from "@/stores/global_state";
-import { useRecentUpdatedStore } from "@/stores/recent_updated";
-import { onMounted } from "vue";
 import { _get } from "@/utils/fetch";
 import IconClose from "@/components/icons/IconClose.vue";
 import Rooms from "@/components/ContactBox/Rooms.vue";
 import Friends from "@/components/ContactBox/Friends.vue";
 
 const useGlobalStore = useGlobalStateStore();
-const recentUpdatedStore = useRecentUpdatedStore();
-
-onMounted(() => {
-	_get("/api/v1/room/all")
-		.then((data) => {
-      console.log(data)
-			recentUpdatedStore.updateRoomSet(data);
-		})
-		.catch((err) => {
-			console.error(err);
-		});
-	_get("/api/v1/friend")
-		.then((data) => {
-			recentUpdatedStore.updateFriendSet(data);
-		})
-		.catch((err) => {
-			console.error(err);
-		});
-});
 </script>
 
 <template>
