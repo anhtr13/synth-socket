@@ -72,8 +72,10 @@ func (s *SocketServer) HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 
 		if err != nil {
 			// Read failed => client disconnected
-			s.noticeOnlineStatusToFriends(user, time.Now().Format(time.RFC3339Nano))
 			s.cleanUpClient(client, user)
+			if user == nil || user.CountClients() == 0 {
+				s.noticeOnlineStatusToFriends(user, time.Now().Format(time.RFC3339Nano))
+			}
 			return
 		}
 		if msgType != websocket.MessageText {

@@ -58,13 +58,15 @@ func main() {
 }
 
 func insertDb(qmsg queue.SaveMessage) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-	defer cancel()
 	sender_uuid, err := uuid.Parse(qmsg.SenderId)
 	room_uuid, err := uuid.Parse(qmsg.ReceiverId)
 	if err != nil {
 		return err
 	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
 	msg, err := DB_Queries.CreateMessage(
 		ctx,
 		database.CreateMessageParams{
@@ -76,6 +78,7 @@ func insertDb(qmsg queue.SaveMessage) error {
 	)
 	if err != nil {
 		log.Println("Cannot save message:", err.Error())
+		return err
 	}
 	err = DB_Queries.UpdateRoomLastMessage(
 		ctx,
@@ -86,7 +89,7 @@ func insertDb(qmsg queue.SaveMessage) error {
 		},
 	)
 	if err != nil {
-		return err
+		log.Println("Cannot update last message:", err.Error())
 	}
-	return nil
+	return err
 }

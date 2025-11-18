@@ -27,6 +27,5 @@ func (c *Client) WriteMsg(msg BroadcastPayload) error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
 	defer cancel()
 	data, _ := json.Marshal(msg)
-	err := c.Conn.Write(ctx, websocket.MessageText, []byte(data))
-	return err
+	return c.Conn.Write(ctx, websocket.MessageText, data)
 }

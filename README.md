@@ -7,7 +7,7 @@ An idiomatic, minimal-dependencies real-time chat app.
 **1. Prerequisites:**
 
 - [Docker](https://docs.docker.com/get-started/get-docker/) installed with [docker-compose](https://docs.docker.com/get-started/get-docker/) pluggin.
-- [Goose](https://github.com/pressly/goose) for database schemas migration.
+- [Goose](https://github.com/pressly/goose) (or other similar tool) for database schemas migration.
 - [Ngrok](https://dashboard.ngrok.com/get-started/setup/linux) (optional) if you wanna publish the app to the internet.
 - [Sqlc](https://docs.sqlc.dev/en/latest) (optional) if you wanna make change in the sql schemas/queries.
 

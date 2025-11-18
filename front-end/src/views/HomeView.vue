@@ -25,6 +25,9 @@ onMounted(async () => {
 			console.error("here", err);
 			router.push("/auth/login");
 		});
+	if (!personalStore.info) {
+		return;
+	}
 	await Promise.all([
 		_get("/api/v1/room/all")
 			.then((data) => {
