@@ -106,7 +106,7 @@ services:
         restart: true
 
   nginx:
-    build: .
+    build: ./front-end
     container_name: nginx
     restart: always
     ports:

@@ -1,9 +1,9 @@
 # BUILDER --------------------------------
 FROM node:24 as builder
 WORKDIR /app
-COPY ./front-end/package*.json ./
+COPY ./package*.json ./
 RUN npm install
-COPY ./front-end/ ./
+COPY ./ ./
 RUN npm run build
 
 # RUNNER --------------------------------
