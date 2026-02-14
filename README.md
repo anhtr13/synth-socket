@@ -48,11 +48,7 @@ An idiomatic, minimal-dependencies real-time chat app.
 - You can create multiple rooms but not with the same name.
 - You can only invite friends to rooms that you created.
 
-## Dependencies
-
-- [coder/websocket](https://github.com/coder/websocket) to handle websocket connections.
-- [jackc/pgx](https://github.com/jackc/pgx) for Postgres driver.
-- Front-end: VueJS, Pinia, Zod, Tailwindcss, etc.
+_**Note:** Make sure to change environment variables in .env file to your preference._
 
 ## Architecture (Oct 2025)
 
